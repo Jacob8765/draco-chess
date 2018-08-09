@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - Messages</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/css/mdb.min.css" rel="stylesheet">
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/js/mdb.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+    <a class="navbar-brand" href="/"><%= config.siteName %></a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="basicExampleNav">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="/messages">Messages 
+            <span id="messages" class="badge badge-light <%= messageNotificationsLength > 0 ? '' : 'd-none' %>"><%= messageNotificationsLength %></span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/games">Games</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <% if (user.isAdmin) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin">Admin Console</a>
+          </li>
+        <% } %>
+        <li class="nav-item">
+          <a class="nav-link" href="/profile/<%= user.name %>">Profile</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="w-75 m-auto text-center">
+    <h5 class="font-weight-light"><%= message %></h5>
+
+    <div class="d-flex justify-content-center">
+      <button class="btn btn-success m-3" data-toggle="modal" data-target="#messageModal"><i class="fas fa-reply mr-1"></i> Reply</button>
+      <button class="btn btn-info m-3"><i class="fas fa-bookmark mr-1"></i> Save Message</button>
+      <button class="btn btn-danger m-3" onClick="deleteMessage()"><i class="fas fa-trash-alt mr-1"></i> Delete</button>
+    </div>
+  </div>
+
+  <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="messageModalLabel">Compose a message</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+          <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="playerName">Select player:</label>
+              <select class="form-control" id="playerName" disabled>
+                <option><%= from %></option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea class="form-control rounded-0" id="message" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onClick="sendMessage()" data-dismiss="modal">Send</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  var socket = io.connect(window.location.host);
+  const user = <%- JSON.stringify(user.name) %>;
+
+  sendMessage = () => {
+    let to = document.getElementById("playerName").value;
+    let message = document.getElementById("message").value;
+
+    axios.post('/api/sendMessage', {
+      message: message,
+      to: to
+    })
+    .then(function (response) {
+      console.log(response);
+      document.getElementById("message").value = "";
+
+      socket.emit("message", {
+        from: user,
+        to: to
+      });
+    })
+    .catch(function (error) {
+      console.log(error);
+    });  
+  }
+
+  deleteMessage = () => {
+    axios.post('/api/deleteMessage', {
+      id: <%- JSON.stringify(id) %>
+    })
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+    window.location = "/messages";
+  }
+
+  socket.on("message", (data) => {
+    console.log(data);
+    if (data.to == user) {
+      if (document.getElementById("messages").getAttribute("class").split(" ").indexOf("d-none") !== -1) {
+        $("#messages").removeClass("d-none");
+      }
+
+      if (document.title[0] !== "(") {
+        document.title = "(0) " + document.title;
+      }
+      document.getElementById("messages").innerHTML = Number(document.getElementById("messages").innerHTML) + 1;
+      document.title = document.title.replace(document.title[1], Number(document.title[1]) + 1);      
+    }
+  });
+</script>
+
+</html>

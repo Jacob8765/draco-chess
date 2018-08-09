@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - <%= profile.name %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/css/mdb.min.css" rel="stylesheet">
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/js/mdb.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+    <a class="navbar-brand" href="/"><%= config.siteName %></a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="basicExampleNav">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/messages">Messages 
+            <span id="messages" class="badge badge-light <%= messageNotificationsLength > 0 ? '' : 'd-none' %>"><%= messageNotificationsLength %></span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/games">Games</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <% if (user.isAdmin) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin">Admin Console</a>
+          </li>
+        <% } %>
+        <li class="nav-item active">
+          <a class="nav-link" href="/profile/<%= user.name %>">Profile</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="text-center">
+    <div class="mx-auto my-3 hoverable profile-img"></div>
+
+    <div class="m-2">
+      <h2 class="m-1"><%= profile.name %> 
+        <% if (profile.name == user.name) { %>
+          (<a href="/editProfile"><i class="fas fa-user-edit mr-1"></i> Edit profile</a>)
+        <% } %>
+      </h2>
+
+      <p>Member since <%= profile.dateJoined %></p>
+    </div>
+
+    <div class="m-4" id="chart">
+      <canvas id="doughnutChart" class="m-auto"></canvas>
+    </div>
+
+    <% if (profile.profile.realName) { %>
+      <div id="realName" class="w-50 mx-auto my-3">
+        <h6><b class="mb-1">Real name:</b> <%= profile.profile.realName %></h6>
+      </div>
+    <% } %>
+
+    <% if (profile.profile.location) { %>
+      <div id="location" class="w-50 mx-auto my-3">
+        <h6><b class="mb-1">Location:</b> <%= profile.profile.location %></h6>
+      </div>
+    <% } %>
+
+    <% if (profile.profile.aboutMe) { %>
+      <div id="aboutMe" class="w-50 mx-auto my-5">
+        <b class="mb-1">About me:</b>
+        <h5 class="mt-2"><%= profile.profile.aboutMe %></h5>
+      </div>
+    <% } %>
+  </div>
+
+  <style>
+    .profile-img {
+      width: 200px;
+      height: 200px;
+      border-radius: 100px;
+
+      background-image: url("<%= profile.profile.picture %>");
+      background-size: cover;
+      background-position: center center;
+}
+
+    #doughnutChart {
+      max-width: 600px;
+    }
+  </style>
+</body>
+
+<script>
+  const games =  <%- JSON.stringify(games) %>;
+  const user = <%- JSON.stringify(user) %>;
+  const profile = <%- JSON.stringify(profile.profile) %>;
+
+  var wins = 0;
+  var draws = 0;
+  var losses = 0;
+  var socket = io.connect(window.location.host);
+
+  games.map((game) => {
+    if (game.w == profile.name || game.b == profile.name) {
+      if (game.isOver) {
+        if (game.winner == profile.name) {
+          wins++;
+        } else if (game.winner == "draw") {
+          draws++;
+        } else {
+          losses++;
+        }
+      }
+    }
+  });
+
+  var ctxD = document.getElementById("doughnutChart").getContext('2d');
+  var myLineChart = new Chart(ctxD, {
+    type: 'doughnut',
+    data: {
+      labels: ["Wins", "Losses", "Draws"],
+      datasets: [
+        {
+          data: [wins, losses, draws],
+          backgroundColor: ["#46BFBD","#F7464A", "#949FB1"],
+          hoverBackgroundColor: ["#5AD3D1", "#FF5A5E", "#A8B3C5"]
+        }
+      ]
+    },
+    options: {
+      responsive: true
+    }
+  });
+
+  if (wins <= 0 && losses <= 0 && draws <= 0) {
+    $("#chart").addClass("d-none");
+  }
+
+  socket.on("message", (data) => {
+    console.log(data);
+    if (data.to == user) {
+      if (document.getElementById("messages").getAttribute("class").split(" ").indexOf("d-none") !== -1) {
+        $("#messages").removeClass("d-none");
+      }
+
+      if (document.title[0] !== "(") {
+        document.title = "(0) " + document.title;
+      }
+      document.getElementById("messages").innerHTML = Number(document.getElementById("messages").innerHTML) + 1;
+      document.title = document.title.replace(document.title[1], Number(document.title[1]) + 1);      
+    }
+  });
+</script>
+
+</html>

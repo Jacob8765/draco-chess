@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+  <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/bootstrap/css/mdb.min.css" rel="stylesheet">
+
+  <script type="text/javascript" src="/bootstrap/js/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="/bootstrap/js/popper.min.js"></script>
+  <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/bootstrap/js/mdb.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+    <a class="navbar-brand" href="/"><%= config.siteName %></a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="basicExampleNav">
+
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/messages">Messages 
+                  <span id="messages" class="badge badge-light <%= messageNotificationsLength > 0 ? '' : 'd-none' %>"><%= messageNotificationsLength %></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/games">Games</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+          <% if (user.isAdmin) { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/admin">Admin Console</a>
+            </li>
+          <% } %>
+          <li class="nav-item">
+            <a class="nav-link" href="/profile/<%= user.name %>">Profile</a>
+          </li>
+        </ul>
+    </div>
+  </nav>
+
+  <% if (serverMessages.message && serverMessages.date) { %>
+    <div id="serverMessages" class="text-center mb-5">
+      <div class="w-75 m-auto big-card">
+        <p class="p-2 m-0 text-left container-text">SERVER MESSAGES</p>
+        <div class="text-left flex-wrap p-4" id="serverMessagesText">
+          <p><b class="mr-2"><%= serverMessages.date %></b> <span id="serverMessageText"></span></p>
+        </div>
+      </div>
+    </div>
+  <% } %>
+  
+  <% var gamesNum = 0 %>
+  <% var allGamesNum = 0 %>
+  <% games.map((game) => {if (!game.isOver && !game.isChallenge) gamesNum++}) %>
+  <% games.map((game) => {if (!game.isOver) allGamesNum++}) %>
+  
+  <div id="games" class="text-center">
+    <div class="w-75 m-auto big-card">
+      <p class="p-2 m-0 text-left container-text">MY GAMES: <b><%= gamesNum %></b></p>
+      <div class="d-flex justify-content-center flex-wrap p-4" id="ongoingGames">
+        <% if (allGamesNum > 0) { %>
+          <% games.map((game) => { %>
+              <%if (!game.isOver && !game.isChallenge) { %>
+                <% gamesNum++ %>
+                <div id="<%= game.gameId %>" class="m-3 tile z-depth-1-half text-dark p-2 <%= game[game.currentTurn] == user.name ? 'bg-success' : 'bg-danger' %>">
+                  <b><%- game.w == user.name ? game.b : game.w %></b>
+                  <p title="<%= game.gameId %>">ID: <%- JSON.stringify(game.gameId).substring(0, 7) + "..." %></p>
+                  <p><a href="/game?id=<%= game.gameId %>" target="_blank">Open Game</a></p>
+                </div>
+            <%} else if (game.isChallenge) {%>
+              <div id="<%= game.gameId %>Challenge" class="m-3 tile z-depth-1-half text-dark p-2 <%= game.challenger !== user.name ? 'bg-warning' : '' %>">
+                <b><%- game.w == user.name ? game.b : game.w %></b>
+                <p title="<%= game.gameId %>">ID: <%- JSON.stringify(game.gameId).substring(0, 7) + "..." %></p>
+
+                <% if (game.challenger !== user.name) { %>
+                  <p><a href="javascript:;" onClick="acceptChallenge('<%= game.gameId %>')">Accept</a> <a href="javascript:;" onClick="revokeChallenge('<%= game.gameId %>')">Revoke</a></p>
+                <%} else {%>
+                  <p><a href="javascript:;" onClick="revokeChallenge('<%= game.gameId %>')">Revoke</a></p>
+                <%}%>
+              </div>
+            <%}%>   
+          <% }); %>
+        <% } else { %>
+          <h5 id="noGames">No games</h5>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div id="online" class="text-center mt-5">
+    <div class="w-75 m-auto big-card">
+      <p class="p-2 m-0 text-left container-text">ONLINE USERS: <b><%= onlineUsers.length %></b></p>
+      <div class="d-flex justify-content-center flex-wrap p-4" id="onlineUsers">
+        <% if (onlineUsers.length > 0) { %>
+          <% onlineUsers.map((user) => { %>
+            <p class="<%= onlineUsers.length > 1 ? 'mr-2' : ''%>"><a href="/profile/<%= user %>"><%= user %></a><%= onlineUsers.length > 1 ? "," : ""%></p>
+          <% }); %>
+        <% } else { %>
+          <h5 id="noGames">No users currently online</h5>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="m-5 d-flex justify-content-center">
+    <button class="btn btn-primary" data-toggle="modal" data-target="#challengeModal"><i class="fas fa-plus mr-1"></i> New Game</button>
+  </div>
+
+  <div class="modal fade text-center" id="challengeModal" tabindex="-1" role="dialog" aria-labelledby="challengeModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="challengeModalLabel">Challenge a player</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                <form>
+                <div class="form-group">
+                  <label for="playerName">Select player:</label>
+                  <select class="form-control" id="playerName">
+                    <% players.map((player) => { %>
+                      <% if (player !== user.name) { %>
+                        <option><%= player %></option>
+                      <%}%>  
+                    <% } )%>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="playerName">Time:</label>
+                  <select class="form-control" id="time">
+                    <option>Short (5 minutes)</option>
+                    <option>Normal (1 hour)</option>
+                    <option>Long (3 days)</option>
+                  </select>
+                </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <button type="button" class="btn btn-primary" onClick="challenge()" data-dismiss="modal">Challenge</button>
+              </div>
+          </div>
+      </div>
+</body>
+
+<style>
+  body {
+    background-color: #fafafa;
+  }
+
+  .tile {
+    min-width: 130px;
+    min-height: 105px;
+    max-width: 130px;
+    max-height: 105px;
+  }
+
+  .big-card {
+    background-color: #eeeeee;
+    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
+
+  .container-text {
+    background-color: #bdbdbd;
+  }
+</style>
+
+<script>
+  var socket = io.connect(window.location.host);
+  const user = <%- JSON.stringify(user.name) %>;
+
+  challenge = () => {    
+    let player = document.getElementById("playerName").value;
+    let time = document.getElementById("time").value;
+    let timeInMilliseconds = 0;
+
+    switch(time) {
+      case "Short (5 minutes)":
+        timeInMilliseconds = 300000;
+        break;
+      case "Normal (1 hour)":
+        timeInMilliseconds = 3600000;
+        break;
+      case "Long (3 days)":
+        timeInMilliseconds = 259200000;
+        break;
+    }
+
+    axios.post('/api/gameChallenge', {
+      opponent: player,
+      time: timeInMilliseconds
+    })
+    .then(function (response) {
+      $("#noGames").addClass("d-none");
+      document.getElementById("ongoingGames").innerHTML += '<div id="' + response.data.id + 'Challenge" class="m-3 tile z-depth-1-half text-dark p-2"><b>' + player + '</b><p title="' + response.data.id +'">ID: ' + response.data.id.substring(0, 7) + '...</p><p><a href="javascript:;" onClick="revokeChallenge(' + response.data.id + ')">Revoke</a></p></div>';
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
+
+  acceptChallenge = (id) => {
+    axios.post('/api/acceptChallenge', {
+      id: id
+    })
+    .then(function (response) {
+      console.log(response);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+    window.location = "/";
+  }
+
+  revokeChallenge = (id) => {
+    const game = <%- JSON.stringify(games) %>.indexOf({id: id});
+
+    axios.post('/api/declineChallenge', {
+      id: id
+    })
+    .then(function (response) {
+      $("#" + id + "Challenge").addClass("d-none");
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
+
+  socket.on("message", (data) => {
+    console.log(data);
+    if (data.to == user) {
+      if (document.getElementById("messages").getAttribute("class").split(" ").indexOf("d-none") !== -1) {
+        $("#messages").removeClass("d-none");
+      }
+
+      if (document.title[0] !== "(") {
+        document.title = "(0) " + document.title;
+      }
+      document.getElementById("messages").innerHTML = Number(document.getElementById("messages").innerHTML) + 1;
+      document.title = document.title.replace(document.title[1], Number(document.title[1]) + 1);      
+    }
+  });
+
+  socket.on("move", (data) => {
+    let element = document.getElementById(data.gameId);
+    console.log("Class ", element.getAttribute("class"));
+
+    if (element) {
+      element.className = element.getAttribute("class") == "m-3 tile z-depth-1-half text-dark p-2 bg-success" ? "m-3 tile z-depth-1-half text-dark p-2 bg-danger" : "m-3 tile z-depth-1-half text-dark p-2 bg-success";
+    }
+  });
+
+  if (document.getElementById("serverMessageText")) {
+    document.getElementById("serverMessageText").innerHTML = <%- JSON.stringify(serverMessages.message) %>;
+  }
+</script>
+
+</html>

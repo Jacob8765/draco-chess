@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - Admin Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/css/mdb.min.css" rel="stylesheet">
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/js/mdb.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+    <a class="navbar-brand" href="/"><%= config.siteName %></a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="basicExampleNav">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/messages">Messages 
+            <span id="messages" class="badge badge-light <%= messageNotificationsLength > 0 ? '' : 'd-none' %>"><%= messageNotificationsLength %></span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/games">Games</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <% if (user.isAdmin) { %>
+          <li class="nav-item active">
+            <a class="nav-link" href="/admin">Admin Console</a>
+          </li>
+        <% } %>
+        <li class="nav-item">
+          <a class="nav-link" href="/profile/<%= user.name %>">Profile</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="row m-4">
+    <div class="col-3">
+      <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+        <a class="nav-link active" id="settingsNav" data-toggle="pill" href="#settings" role="tab" aria-controls="settings" aria-selected="true"><i class="fas fa-sliders-h mr-1"></i> General Settings</a>
+        <a class="nav-link" id="manageMembersNav" data-toggle="pill" href="#manageMembers" role="tab" aria-controls="manageMembers" aria-selected="false"><i class="fas fa-user-cog mr-1"></i> Manage Members</a>
+        <a class="nav-link" id="serverMessagesNav" data-toggle="pill" href="#serverMessages" role="tab" aria-controls="serverMessages" aria-selected="false"><i class="fas fa-envelope mr-1"></i> Server Messages</a>
+      </div>
+    </div>
+    <div class="col-9">
+      <div class="tab-content" id="v-pills-tabContent">
+        <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+          <div class="mx-auto my-3 text-center">
+            <h3 class="m-4">General Settings</h3>
+
+            <form method="post" action="/api/updateConfig" class="w-50 m-auto text-left">
+              <div class="form-group">
+                <label for="siteName">Site name</label>
+                <input type="text" class="form-control" id="siteName" value="<%= config.siteName %>" name="siteName" required>
+              </div>
+              <div class="form-group">
+                <label for="upload">Max profile pic upload size (in megabytes)</label>
+                <input type="number" class="form-control" id="upload" value="<%= config.profilePicMaxSize %>" name="upload" required>
+              </div>
+
+              <div class="custom-control custom-checkbox m-2">
+                <input type="checkbox" class="custom-control-input" id="requireApproval" name="requireApproval">
+                <label class="custom-control-label" for="requireApproval">Require approval for new members</label>
+              </div>
+
+              <div class="m-4 d-flex justify-content-center">
+                <button class="btn btn-success btn-lg" type="submit"><i class="fas fa-paper-plane mr-1"></i> Submit</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="manageMembers" role="tabpanel" aria-labelledby="manage-members-tab">
+          <% if (accounts.length > 0) { %>
+            <% if (pendingAccounts.length > 0) { %>
+              <h3 class="text-center m-2 mt-4">Members pending approval</h3>
+              <table class="table table-striped w-75 m-auto">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Date Joined</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+          
+                <tbody id="messageTable">
+                <% pendingAccounts.map((account, index) => { %>
+                  <tr>
+                    <th scope="row"><%= index + 1 %></th>
+                    <td><%= account.name %></td>
+                    <td><%= account.firstName %></td>
+                    <td><%= account.lastName %></td>
+                    <td><%= account.email %></td>
+                    <td><%= new Date(account.dateJoined).toLocaleDateString("en-US") %></td>
+                    <td><a href="javascript:;" class="text-success mr-3" onClick="acceptMember('<%= account.name %>', '<%= account.id %>')" title="Accept Member"><i class="fas fa-check-circle fa-lg"></i></a> <a href="javascript:;" class="text-danger" onClick="deleteMember('<%= account.name %>', '<%= account.email %>')" title="Remove Member"><i class="fas fa-times-circle fa-lg"></i></a></td>
+                  </tr>
+                <%})%>
+                </tbody>
+              </table>
+            <% } %>
+
+            <h3 class="text-center m-2 mt-4">All members</h3>
+              <table class="table table-striped w-75 m-auto">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Date Joined</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+          
+                <tbody id="messageTable">
+                <% accounts.map((account, index) => { %>
+                  <tr>
+                    <th scope="row"><%= index + 1 %></th>
+                    <td><%= account.name %></td>
+                    <td><%= account.firstName %></td>
+                    <td><%= account.lastName %></td>
+                    <td><%= account.email %></td>
+                    <td><%= new Date(account.dateJoined).toLocaleDateString("en-US") %></td>
+                    <td><a href="javascript:;" class="text-danger mr-2" onClick="deleteMember('<%= account.name %>', '<%= account.id %>')" title="Delete Member"><i class="fas fa-times-circle fa-lg"></i></a> <a href="javascript:;" class="text-primary mr-2" data-toggle="modal" data-target="#changePassword<%= account.name %>" title="Change Password"><i class="fas fa-key fa-lg"></i></a> <a href="javascript:;" class="brown-text" data-toggle="modal" data-target="#editProfile<%= account.name %>" title="Edit Profile"><i class="fas fa-user-edit fa-lg"></i></a> </td>
+                  </tr>
+                <%})%>
+                </tbody>
+              </table>
+
+              <% accounts.map((account) => { %>
+                <div class="modal fade" id="changePassword<%= account.name %>" tabindex="-1" role="dialog" aria-labelledby="changePassword<%= account.name %>" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="changePassword<%= account.name %>">Change <%= account.name %>'s Password</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="form-group">
+                          <label for="password<%= account.name %>">New password</label>
+                          <input type="password" class="form-control" id="password<%= account.name %>">
+                        </div>
+
+                        <div class="form-group">
+                          <label for="confirmPassword<%= account.name %>">Confirm password</label>
+                          <input type="password" class="form-control" id="confirmPassword<%= account.name %>">
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="changePassword('<%= account.name %>', '<%= account.id %>')"><i class="fas fa-user-lock mr-1"></i> Change Password</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="modal fade" id="editProfile<%= account.name %>" tabindex="-1" role="dialog" aria-labelledby="editProfile<%= account.name %>" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="editProfile<%= account.name %>">Edit <%= account.name %>'s Profile</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <div class="form-group">
+                        <label for="username<%= account.name %>">Username</label>
+                        <input type="text" class="form-control" id="username<%= account.name %>" value="<%= account.name %>">
+                      </div>
+                      <div class="form-group">
+                        <label for="realName<%= account.name %>">Real name</label>
+                        <input type="text" class="form-control" id="realName<%= account.name %>" value="<%= account.profile.realName %>">
+                      </div>
+
+                      <div class="form-group">
+                        <label for="location<%= account.name %>">Location</label>
+                        <input type="text" class="form-control" id="location<%= account.name %>" value="<%= account.profile.location %>">
+                      </div>
+
+                      <div class="form-group">
+                        <label for="aboutMe<%= account.name %>">About me</label>
+                        <textarea type="text" class="form-control" id="aboutMe<%= account.name %>"><%= account.profile.aboutMe %></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="updateProfile('<%= account.name %>', '<%= account.id %>')"><i class="fas fa-edit mr-1"></i> Update Profile</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <% }); %>
+          <% } %>
+        </div>
+
+        <div class="tab-pane fade" id="serverMessages" role="tabpanel" aria-labelledby="server-messages-tab">
+          <h3 class="m-4 text-center">Server messages</h3>
+
+          <div class="btn-group m-3 d-flex justify-content-center" role="group">
+            <button type="button" class="btn btn-mdb-color" onClick="insertFormatting('bold')"><i class="fas fa-bold"></i></button>
+            <button type="button" class="btn btn-mdb-color" onClick="insertFormatting('italic')"><i class="fas fa-italic"></i></button>
+            <button type="button" class="btn btn-mdb-color" onClick="insertFormatting('underline')"><i class="fas fa-underline"></i></button>
+          </div>
+
+          <form method="post" action="/api/serverMessage">
+            <div class="form-group m-auto">
+              <label for="serverMessagesTextArea">Characters remaining: <span id="serverMessagesChar"><%= 2000 - serverMessages.message.length %></span></label>
+              <textarea class="form-control" id="serverMessagesTextarea" name="message" rows="12" placeholder="Type a server message..." onkeyup="updateCharCount()" maxLength="2000"><%= serverMessages.message %></textarea>
+            </div>
+
+            <div class="m-4 d-flex justify-content-center">
+              <button class="btn btn-success btn-lg" type="submit"><i class="fas fa-paper-plane mr-1"></i> Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+<script>
+  const user = <%- JSON.stringify(user) %>;
+  const config = <%- JSON.stringify(config) %>
+  var socket = io.connect(window.location.host);
+
+  if (config.requireApproval) {
+    document.getElementById("requireApproval").checked = true;
+  }
+
+  socket.on("message", (data) => {
+    console.log(data);
+    if (data.to == user) {
+      if (document.getElementById("messages").getAttribute("class").split(" ").indexOf("d-none") !== -1) {
+        $("#messages").removeClass("d-none");
+      }
+
+      if (document.title[0] !== "(") {
+        document.title = "(0) " + document.title;
+      }
+      document.getElementById("messages").innerHTML = Number(document.getElementById("messages").innerHTML) + 1;
+      document.title = document.title.replace(document.title[1], Number(document.title[1]) + 1);      
+    }
+  });
+
+  acceptMember = (name, id) => {
+    axios.post('/api/acceptMember', {
+      name: name,
+      id: id
+    })
+    .then(function (response) {
+      window.location = window.location;
+    })
+    .catch(function (error) {
+      console.log(error);
+    });  
+  }
+
+  deleteMember = (name, id) => {
+    console.log(name, id);
+
+    swal({
+      title: "Are you sure?",
+      text: name + "'s account will be permanently deleted. This action can not be undone!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        axios.post('/api/deleteMember', {
+          name: name,
+          id: id
+        })
+        .then(function (response) {
+          swal("Success", name + "'s account has been successfully deleted", "success")
+            .then((value) => {
+              window.location = window.location;
+            });
+        })
+        .catch(function (error) {
+          swal("Error", "Something went wrong while deleting " + name + "'s account", "error");
+          console.log(error);
+        });   
+      } else {
+        swal(name + "'s account has not been deleted");
+      }
+    });
+  }
+
+  changePassword = (name, id) => {
+    let password = document.getElementById("password" + name).value;
+    let confirmPassword = document.getElementById("confirmPassword" + name).value;
+
+    if (password !== confirmPassword) {
+      swal("Error", "The passwords you entered do not match", "error");
+    } else {
+      axios.post('/api/changePassword', {
+        name: name,
+        id: id,
+        password: password
+      })
+      .then(function (response) {
+        document.getElementById("password" + name).value = "";
+        document.getElementById("confirmPassword" + name).value = "";
+
+        swal("Success", "Successfully changed " + name + "'s password", "success")
+      })
+      .catch(function (error) {
+        console.log(error);
+      });  
+    }
+  }
+
+  updateProfile = (name, id) => {
+    let realName = document.getElementById("realName" + name).value;
+    let location = document.getElementById("location" + name).value;
+    let aboutMe = document.getElementById("aboutMe" + name).value;
+    let username = document.getElementById("username" + name).value;
+
+    axios.post('/api/updateProfile', {
+      name: name,
+      id: id,
+      realName: realName,
+      location: location,
+      aboutMe: aboutMe,
+      username: username
+    })
+    .then(function (response) {
+      document.getElementById("realName" + name).value = "";
+      document.getElementById("location" + name).value = "";
+      document.getElementById("aboutMe" + name).value = "";
+      document.getElementById("username" + name).value = "";
+
+      swal("Success", "Successfully updated " + name + "'s profile", "success")
+        .then((value) => {
+          window.location = "/admin";
+        });
+    })
+    .catch(function (error) {
+      swal("Error", "something went wrong", "error")
+
+      console.log(error);
+    });  
+  }
+
+  insertFormatting = (format) => {
+    switch (format) {
+      case "italic":
+        document.getElementById("serverMessagesTextarea").value += "<i></i>";
+        document.getElementById("serverMessagesTextarea").focus();
+        break;
+      case "bold":
+        document.getElementById("serverMessagesTextarea").value += "<b></b>";
+        document.getElementById("serverMessagesTextarea").focus();
+        break;
+      case "underline":
+        document.getElementById("serverMessagesTextarea").value += "<u></u>";
+        document.getElementById("serverMessagesTextarea").focus();
+        break;
+    }
+  }
+
+  updateCharCount = () => {
+    document.getElementById("serverMessagesChar").innerHTML = 2000 - Number($("#serverMessagesTextarea").val().length);
+  }
+</script>
+
+</html>

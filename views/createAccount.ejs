@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= config.siteName %> - Create Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/css/mdb.min.css" rel="stylesheet">
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/js/mdb.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+    <a class="navbar-brand" href="/"><%= config.siteName %></a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="basicExampleNav">
+      <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+              <a class="nav-link" href="/">Login</a>
+          </li>
+      </ul>
+    </div>
+  </nav>
+
+  <form class="m-auto" action="/api/createAccount" onsubmit="validateForm()" method="post">
+    <p class="h4 text-center mb-4">Create an account</p>
+
+    <label for="defaultFormLoginUsernameEx" class="grey-text">Username</label>
+    <input type="username" id="defaultFormLoginUsernameEx" class="form-control" name="username" required>
+
+    <br>
+
+    <label for="email" class="grey-text">Email</label>
+    <input type="email" id="email" class="form-control" name="email" required>
+
+    <br>
+
+    <label for="firstName" class="grey-text">First name</label>
+    <input type="firstName" id="firstName" class="form-control" name="firstName" required>
+
+    <br>
+
+    <label for="firstName" class="grey-text">Last name</label>
+    <input type="lastName" id="lastName" class="form-control" name="lastName" required>
+
+    <br>
+
+    <label for="password" class="grey-text">Password</label>
+    <input type="password" id="password" class="form-control" name="password" required>
+
+    <br>
+
+    <label for="confirmPassword" class="grey-text">Confirm password</label>
+    <input type="password" id="confirmPassword" class="form-control" name="confirmPassword">
+
+    <div class="text-center mt-4">
+      <button class="btn btn-indigo" type="submit"><i class="fas fa-user-alt mr-1"></i> Create Account</button>
+    </div>
+  </form>
+
+  <p class="text-center m-3">Already have an account? <a href="/login">Login</a></p>
+
+</body>
+
+<style>
+  body {
+    background-color: #fafafa;
+  }
+
+  form {
+    max-width: 30%;
+    min-width: 500px;
+  }
+</style>
+
+<script>
+  validateForm = () => {
+    if (document.getElementById("password").innerHTML !== document.getElementById("confirmPassword").innerHTML) {
+      swal("Error", "The passwords you entered do not match", "error");
+      return false;
+    }
+  }
+</script>
+
+</html>

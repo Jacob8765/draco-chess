@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= config.siteName %> - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/css/mdb.min.css" rel="stylesheet">
+
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/js/mdb.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-5">
+    <a class="navbar-brand" href="/"><%= config.siteName %></a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav" aria-controls="basicExampleNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="basicExampleNav">
+      <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+              <a class="nav-link" href="/login">Login</a>
+          </li>
+      </ul>
+    </div>
+  </nav>
+
+  <form class="m-auto" action="/api/login" method="post">
+    <p class="h4 text-center mb-4">Sign in</p>
+
+    <label for="username" class="grey-text">Username</label>
+    <input type="username" id="username" class="form-control" name="username">
+
+    <br>
+
+    <label for="password" class="grey-text">Password</label>
+    <input type="password" id="password" class="form-control" name="password">
+
+    <div class="text-center mt-4">
+      <button class="btn btn-indigo" type="submit"><i class="fas fa-sign-in-alt mr-1"></i> Login</button>
+    </div>
+  </form>
+
+  <p class="text-center m-3">No account? <a href="/createAccount">Create one</a></p>
+
+  <div class="d-flex justify-content-around m-5 text-center animated bounceInUp">
+    <div>
+      <h4><b>Members:</b> <%= members %></h4>
+      <i class="fas fa-users fa-4x"></i>
+    </div>
+    <div>
+      <h4><b>Games:</b> <%= games %></h4>
+      <i class="fas fa-chess-knight fa-4x"></i>
+    </div>
+    <div>
+      <h4><b>Users online:</b> <%= online %></h4>
+      <i class="fas fa-globe-americas fa-4x"></i>
+    </div>
+  </div>
+
+</body>
+
+<style>
+  body {
+    background-color: #fafafa;
+  }
+
+  form {
+    max-width: 30%;
+    min-width: 500px;
+  }
+</style>
+
+</html>
