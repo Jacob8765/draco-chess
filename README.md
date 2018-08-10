@@ -1,6 +1,6 @@
 # DracoChess
 
-A chess club you can install on your website
+A chess community you can run on your website.
 
 # Running Locally
 
