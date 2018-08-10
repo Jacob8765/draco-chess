@@ -1,6 +1,6 @@
-# jschess
+# DracoChess
 
-A simple chess club for your website
+A chess community you can run on your website.
 
 # Running Locally
 
