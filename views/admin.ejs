@@ -119,7 +119,7 @@
                     <td><%= account.lastName %></td>
                     <td><%= account.email %></td>
                     <td><%= new Date(account.dateJoined).toLocaleDateString("en-US") %></td>
-                    <td><a href="javascript:;" class="text-success mr-3" onClick="acceptMember('<%= account.name %>', '<%= account.id %>')" title="Accept Member"><i class="fas fa-check-circle fa-lg"></i></a> <a href="javascript:;" class="text-danger" onClick="deleteMember('<%= account.name %>', '<%= account.email %>')" title="Remove Member"><i class="fas fa-times-circle fa-lg"></i></a></td>
+                    <td><a href="javascript:;" class="text-success mr-3" onClick="acceptMember('<%= account.name %>', '<%= account.id %>')" title="Accept Member"><i class="fas fa-check-circle fa-lg"></i></a> <a href="javascript:;" class="text-danger" onClick="deleteMember('<%= account.name %>', '<%= account.id %>')" title="Remove Member"><i class="fas fa-times-circle fa-lg"></i></a></td>
                   </tr>
                 <%})%>
                 </tbody>

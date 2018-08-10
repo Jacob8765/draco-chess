@@ -225,7 +225,7 @@ module.exports = (app, db, bcrypt, passport) => {
     let hash = bcrypt.hashSync(req.body.password, 10);
     let id = Math.floor(10000000000000000000 + Math.random() * 9000000000000000000);
 
-    if (!db.get("members.members").find({id: id}).value() && !db.get("members.members").find({name: req.body.username})) {
+    if (!db.get("members.members").find({id: id}).value() && !db.get("members.members").find({name: req.body.username}).value()) {
       db.get("members.members").push(
         {
           name: req.body.username,
@@ -249,11 +249,11 @@ module.exports = (app, db, bcrypt, passport) => {
           id: id
         }
       ).write();
+
+      res.redirect("/login");
     } else {
       res.sendStatus(409);
     }
-
-    res.redirect("/login");
   });
 
   app.post("/api/acceptMember", (req, res) => {
