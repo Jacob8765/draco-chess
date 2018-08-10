@@ -114,6 +114,7 @@
   const games =  <%- JSON.stringify(games) %>;
   const user = <%- JSON.stringify(user) %>;
   const profile = <%- JSON.stringify(profile.profile) %>;
+  const profileName = <%- JSON.stringify(profile.name) %>;
 
   var wins = 0;
   var draws = 0;
@@ -121,9 +122,9 @@
   var socket = io.connect(window.location.host);
 
   games.map((game) => {
-    if (game.w == profile.name || game.b == profile.name) {
+    if (game.w == profileName || game.b == profileName) {
       if (game.isOver) {
-        if (game.winner == profile.name) {
+        if (game.winner == profileName) {
           wins++;
         } else if (game.winner == "draw") {
           draws++;

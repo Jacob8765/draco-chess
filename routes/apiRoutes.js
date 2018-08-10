@@ -209,7 +209,7 @@ module.exports = (app, db, bcrypt, passport) => {
               db.get("games").find({ gameId: Number(req.body.id) }).assign({ drawRequested: false, drawRequestedBy: null }).write();
               break;
             case "resign":
-              db.get("games").find({ gameId: Number(req.body.id) }).assign({ isOver: true, winner: db.get("games").find({ gameId: Number(req.body.id) }).get("w").value() == req.user.name ? db.get("games").find({ gameId: Number(req.body.id) }).get("b").value() : db.get("games").find({ gameId: Number(req.body.id) }).get("w").value() }).write();
+              db.get("games").find({ gameId: Number(req.body.id) }).assign({ isOver: true, winner: db.get("games").find({ gameId: Number(req.body.id), dateFinished: Date.now() }).get("w").value() == req.user.name ? db.get("games").find({ gameId: Number(req.body.id) }).get("b").value() : db.get("games").find({ gameId: Number(req.body.id) }).get("w").value() }).write();
               break;
           }
         }

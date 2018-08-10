@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - Messages</title>
+  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - Games</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
@@ -124,6 +124,8 @@
         </tbody>
       </table>
     <% } %>
+  <% } else { %>
+    <h2 class="m-3 text-center">No games to display</h2>
   <% } %>
 </body>
 
