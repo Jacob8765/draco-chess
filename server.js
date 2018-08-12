@@ -54,27 +54,6 @@ db.defaults({
         id: Math.floor(10000000000000000000 + Math.random() * 9000000000000000000)
       },
       {
-        name: "player2",
-        email: "player2@example.com",
-        firstName: "BK",
-        lastName: "Phoney",
-        dateJoined: new Date(Date.now()).toLocaleDateString("en-US"),
-        password: "$2a$10$rleM.UPbml66e/Okd.xZFOzvnXGV29otv9W9AexN3/vrd99vlyQze",
-        messages: [],
-        notifications: { messages: [] },
-        isAdmin: false,
-        lastVisited: 0,
-        isOnline: false,
-        profile: {
-          picture: "/profile/default.jpg",
-          aboutMe: "",
-          realName: "",
-          location: "",
-        },
-        pending: false,
-        id: Math.floor(10000000000000000000 + Math.random() * 9000000000000000000)
-      },
-      {
         name: "admin",
         email: "player2@example.com",
         firstName: "Buddy",
