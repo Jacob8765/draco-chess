@@ -24,16 +24,8 @@ module.exports = (app, db, bcrypt, passport) => {
     if (req.user) {
       if (req.body.opponent !== req.user.name) {
         let id = Math.floor(100000000000000 + Math.random() * 90000000000000);
-        let isUnique = true;
-        let games = db.get("games").value();
 
-        games.map((game) => {
-          if (game.gameId == id) {
-            isUnique = false;
-          }
-        });
-
-        if (isUnique) {
+        if (!db.get("games").find({gameId: id}).value()) {
           db.get("games").push({
             gameId: id,
             dateCreated: "7/10/18",
