@@ -275,7 +275,7 @@
   });
 
   if (document.getElementById("serverMessageText")) {
-    document.getElementById("serverMessageText").innerHTML = <%- JSON.stringify(serverMessages.message) %>;
+    document.getElementById("serverMessageText").innerHTML = <%- JSON.stringify(serverMessages.message) %>.replace(/\n/gi, "<br>");
   }
 </script>
 
