@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - Games</title>
+  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - <%= club.name %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
@@ -13,8 +13,8 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/js/mdb.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
@@ -36,10 +36,10 @@
             <span id="messages" class="badge badge-light <%= messageNotificationsLength > 0 ? '' : 'd-none' %>"><%= messageNotificationsLength %></span>
           </a>
         </li>
-        <li class="nav-item active">
+        <li class="nav-item">
           <a class="nav-link" href="/games">Games</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item active">
           <a class="nav-link" href="/clubs">Chess Clubs</a>
         </li>
         <li class="nav-item">
@@ -59,81 +59,14 @@
     </div>
   </nav>
 
-  <% var ongoingGamesNum = 0 %>
-  <% var finishedGamesNum = 0 %>
+  <div class="m-5" id="clubText"></div>
 
-  <% games.map((game) => { %>
-    <% if (!game.isOver && !game.isChallenge) { %>
-    <% ongoingGamesNum++; %>
-    <% } else { %>
-      <% finishedGamesNum++; %>
-    <% } %>
-  <% }) %>
-
-  <% if (games.length > 0) { %>
-    <% if (ongoingGamesNum > 0) { %>
-      <h3 class="m-5 text-center">Ongoing Games</h3>
-      <table class="table table-hover w-75 m-auto p-3">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Opponent</th>
-            <th>Current Turn</th>
-            <th>Ends On</th>
-          </tr>
-        </thead>
-
-        <tbody id="ongoingGamesTable">
-          <% games.map((game, index) => { %>
-            <% if (!game.isOver && !game.isChallenge) { %>
-            <tr onClick="window.location = '/game?id=<%= game.gameId %>'">
-              <th scope="row"><%= index + 1 %></th>
-              <td><%= game.challenger %></td>
-              <td><%= game[game.currentTurn] %></td>
-              <td><%= new Date(game.dateEnds).toLocaleDateString("en-US") %></td>
-            </tr>
-            <% } %>
-          <% }) %>
-        </tbody>
-      </table>
-      <% if (finishedGamesNum > 0) { %>
-       <hr>
-      <% } %>
-    <% } %>
-
-    <% if (finishedGamesNum > 0) { %>
-      <h3 class="m-5 text-center">Past Games</h3>
-      <table class="table table-hover w-75 m-auto p-3">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Opponent</th>
-            <th>Winner</th>
-            <th>Date Finished</th>
-          </tr>
-        </thead>
-
-        <tbody id="ongoingGamesTable">
-          <% games.map((game, index) => { %>
-            <% if (game.isOver) { %>
-            <tr onClick="window.location = '/game?id=<%= game.gameId %>'">
-              <th scope="row"><%= index + 1 %></th>
-              <td><%= game.w == user.name ? game.b : game.w %></td>
-              <td><%= game.winner %></td>
-              <td><%= new Date(game.dateFinished).toLocaleDateString("en-US") %></td>
-            </tr>
-            <% } %>
-          <%})%>
-        </tbody>
-      </table>
-    <% } %>
-  <% } else { %>
-    <h2 class="m-3 text-center">No games to display</h2>
-  <% } %>
 </body>
 
 <script>
   var socket = io.connect(window.location.host);
+
+  document.getElementById("clubText").innerHTML = marked(<%- JSON.stringify(club.text) %>);
 
   socket.on("message", (data) => {
     console.log(data);

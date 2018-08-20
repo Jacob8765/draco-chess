@@ -8,7 +8,7 @@ module.exports = (app, db) => {
       }
     });
 
-    res.render("login", {config: db.get("config").value(), online: onlineUsers, games: db.get("games").size().value(), members: db.get("members.members").size().value()});
+    res.render("login", { config: db.get("config").value(), online: onlineUsers, games: db.get("games").size().value(), members: db.get("members.members").size().value() });
   });
 
   app.get("/", (req, res) => {
@@ -41,7 +41,7 @@ module.exports = (app, db) => {
         }
       }
 
-      res.render("home", { user: req.user, games: games, players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), onlineUsers: onlineUsers, serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
+      res.render("home", { user: db.get("members.members").find({ id: req.user.id }).value(), games: games, players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), onlineUsers: onlineUsers, serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
     }
   });
 
@@ -64,7 +64,7 @@ module.exports = (app, db) => {
     } else if (req.user.pending) {
       res.redirect("/accountPending");
     } else if (!req.query.id) {
-      res.render("messages", { user: req.user, messages: db.get("members.members").find({ name: req.user.name }).get("messages").value(), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
+      res.render("messages", { user: db.get("members.members").find({ id: req.user.id }).value(), messages: db.get("members.members").find({ name: req.user.name }).get("messages").value(), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
     } else {
       let message = db.get("members.members").find({ name: req.user.name }).get("messages").find({ id: Number(req.query.id) }).value();
 
@@ -73,15 +73,15 @@ module.exports = (app, db) => {
           db.get("members.members").find({ name: req.user.name }).get("notifications.messages").remove({ id: Number(req.query.id) }).write();
         }
 
-        res.render("viewMessage", { message: message.message, from: message.from, id: message.id, user: req.user, messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() })
+        res.render("viewMessage", { message: message.message, from: message.from, id: message.id, user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() })
       } else {
         res.redirect("/")
       }
     }
   });
 
-  app.get("/profile/:id", (req, res) => {
-    if (!req.user || !req.params.id) {
+  app.get("/profile/:name", (req, res) => {
+    if (!req.user) {
       res.redirect("/login");
     } else if (req.user.pending) {
       res.redirect("/accountPending");
@@ -90,9 +90,13 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      let profileUser = db.get("members.members").find({ name: req.params.id }).value();
+      let profileUser = db.get("members.members").find({ name: req.params.name }).value();
 
-      res.render("profile", { games: db.get("games").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: req.user, profile: profileUser, config: db.get("config").value() });
+      if (profileUser) {
+        res.render("profile", { games: db.get("games").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), profile: profileUser, config: db.get("config").value() });
+      } else {
+        res.redirect("/");
+      }
     }
   });
 
@@ -106,7 +110,7 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      res.render("editProfile", { games: db.get("games").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: req.user, profile: db.get("members.members").find({ name: req.user.name }).value(), config: db.get("config").value() });
+      res.render("editProfile", { games: db.get("games").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ name: req.user.name }).value(), profile: db.get("members.members").find({ name: req.user.name }).value(), config: db.get("config").value(), clubs: db.get("clubs").value() });
     }
   });
 
@@ -120,7 +124,7 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      res.render("viewGames", { games: db.get("games").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: req.user, config: db.get("config").value() });
+      res.render("viewGames", { games: db.get("games").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
     }
   });
 
@@ -136,7 +140,7 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      res.render("game", { game: game, user: req.user, messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
+      res.render("game", { game: game, user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
     } else {
       res.redirect("/");
     }
@@ -165,7 +169,7 @@ module.exports = (app, db) => {
           }
         });
 
-        res.render("admin", { user: req.user, messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), pendingAccounts: pendingAccounts, accounts: activeAccounts, serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
+        res.render("admin", { user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), pendingAccounts: pendingAccounts, accounts: activeAccounts, serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
       } else {
         res.redirect("/");
       }
@@ -173,10 +177,73 @@ module.exports = (app, db) => {
   });
 
   app.get("/createAccount", (req, res) => {
-    res.render("createAccount", {config: db.get("config").value()});
+    res.render("createAccount", { config: db.get("config").value() });
   });
 
   app.get("/accountPending", (req, res) => {
-    res.send("<h2 class='m-3 text-center'>Your account is still pending approval. You will be able to use your account as soon as an administrator approves it</h2>");
+    if (req.user) {
+      if (req.user.pending) {
+        res.send("<h2 class='m-3 text-center'>Your account is still pending approval. You will be able to use your account as soon as an administrator approves it</h2>");
+      } else {
+        res.redirect("/");
+      }
+    } else {
+      res.redirect("/login");
+    }
+  });
+
+  app.get("/clubs", (req, res) => {
+    if (!req.user) {
+      res.redirect("/login");
+    } else if (req.user.pending) {
+      res.redirect("/accountPending");
+    } else {
+      if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
+        db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
+      }
+
+      res.render("chessClubs", { clubs: db.get("clubs").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
+    }
+  });
+
+  app.get("/clubs/:clubLink", (req, res) => {
+    if (!req.user) {
+      res.redirect("/login");
+    } else if (req.user.pending) {
+      res.redirect("/accountPending");
+    } else {
+      if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
+        db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
+      }
+
+      db.get("clubs").find({ link: req.params.clubLink }).assign({ hits: db.get("clubs").find({ link: req.params.clubLink }).get("hits").value() + 1 }).write();
+      res.render("viewClub", { club: db.get("clubs").find({ link: req.params.clubLink }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
+    }
+  });
+
+  app.get("/manageClub", (req, res) => {
+    if (!req.user) {
+      res.redirect("/login");
+    } else if (req.user.pending) {
+      res.redirect("/accountPending");
+    } else {
+      if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner" || db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "member") {
+        if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
+          db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
+        }
+
+        let club;
+
+        if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner") {
+          club = db.get("clubs").find({ owner: req.user.id }).value();
+        } else {
+          club = db.get("clubs").find({ name: db.get("members.members").find({ id: req.user.id }).get("club.name").value() }).value();
+        }
+
+        res.render("manageClub", { club: club, messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
+      } else {
+        res.redirect("/")
+      }
+    }
   });
 }

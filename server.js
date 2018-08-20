@@ -51,12 +51,16 @@ db.defaults({
           location: "",
         },
         pending: false,
-        id: Math.floor(10000000000000000000 + Math.random() * 9000000000000000000)
+        id: 1,
+        club: {
+          status: null,
+          name: null,
+        }
       },
       {
         name: "admin",
         email: "player2@example.com",
-        firstName: "Buddy",
+        firstName: "Frank",
         lastName: "Smith",
         dateJoined: new Date(Date.now()).toLocaleDateString("en-US"),
         password: "$2a$10$rleM.UPbml66e/Okd.xZFOzvnXGV29otv9W9AexN3/vrd99vlyQze",
@@ -72,11 +76,17 @@ db.defaults({
           location: "",
         },
         pending: false,
-        id: Math.floor(10000000000000000000 + Math.random() * 9000000000000000000)
+        id: 2,
+        club: {
+          status: "owner",
+          name: "Test Club",
+        }
       }
     ],
   },
   games: [],
+  clubs: [],
+
   serverMessages: { date: null, message: "" },
 
   config: {

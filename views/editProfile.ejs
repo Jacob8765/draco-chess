@@ -6,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/css/mdb.min.css" rel="stylesheet">
-
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/css/mdb.min.css" rel="stylesheet">
+  
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.4/js/mdb.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/js/mdb.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
@@ -39,6 +39,9 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/games">Games</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/clubs">Chess Clubs</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/logout">Logout</a>
@@ -87,6 +90,16 @@
 
     <div class="d-flex justify-content-center mx-auto my-3">
       <button type="button" class="btn btn-deep-orange" data-toggle="modal" data-target="#changePassword"><i class="fas fa-user-lock mr-1"></i> Change Password</button>
+      <% if (!user.club.status) { %>
+        <button type="button" class="btn btn-secondary"  data-toggle="modal" data-target="#joinClub"><i class="fas fa-chess mr-1"></i> Join/Create Club</button>
+      <% } else if (user.club.status == "pending") { %>
+        <button type="button" onClick="leaveClub()" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Revoke Membership</button>
+      <% } else if (user.club.status == "owner") { %>
+        <a href="/manageClub" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Manage Club</a>
+      <% } else { %>
+        <a href="/manageClub" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Manage Membership</a>
+      <% } %>
+
       <button type="button" class="btn btn-danger" onClick="deleteAccount()"><i class="fas fa-trash-alt mr-1"></i> Delete Account</button>
     </div>
 
@@ -127,6 +140,60 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="joinClub" tabindex="-1" role="dialog" aria-labelledby="joinClub" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Join/Create Club</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <h6 class="m-3 text-center"><b>Join Club</b></h6>
+          <p class="m-2">Select a club from the list below. Then wait for a club administrator to accept you.</p>
+          <select class="custom-select" id="selectClub">
+            <% clubs.map((club) => { %>
+              <option><%= club.name %></option>
+            <% }) %>
+          </select>
+          <hr>
+          <h6 class="m-3 text-center"><b>Create Club</b></h6>
+          <div class="m-2 d-flex justify-content-center">
+            <button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal" data-target="#createClub"><i class="fas fa-plus mr-1"></i> Create Club</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="joinClub()"><i class="fas fa-chess mr-1"></i> Join Club</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="createClub" tabindex="-1" role="dialog" aria-labelledby="createClub" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createClub">Create Club</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="clubName">Club Name</label>
+          <input type="text" class="form-control" id="clubName">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="createClub()"><i class="fas fa-plus mr-1"></i> Create Club</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <style>
     .profile-img {
@@ -238,6 +305,47 @@
         swal("Your account has not been deleted");
       }
     });
+  }
+
+  joinClub = () => {
+    let club = document.getElementById("selectClub").value;
+
+    axios.post('/api/joinClub', {
+      clubName: club
+    })
+    .then(function (response) {
+      console.log(response);
+      window.location = "/editProfile";
+    })
+    .catch(function (error) {
+      console.log(error);
+    });  
+  }
+
+  leaveClub = () => {
+    axios.post('/api/leaveClub')
+    .then(function (response) {
+      console.log(response);
+      window.location = "/editProfile";
+    })
+    .catch(function (error) {
+      console.log(error);
+    });  
+  }
+
+  createClub = () => {
+    let clubName = document.getElementById("clubName").value;
+
+    axios.post('/api/createClub', {
+      name: clubName
+    })
+    .then(function (response) {
+      console.log(response);
+      window.location = "/manageClub";
+    })
+    .catch(function (error) {
+      console.log(error);
+    });  
   }
 </script>
 
