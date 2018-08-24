@@ -140,7 +140,7 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      res.render("game", { game: game, user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
+      res.render("game", { game: game, user: db.get("members.members").find({ id: req.user.id }).value(), white: db.get("members.members").find({name: game.w}).value(), black: db.get("members.members").find({name: game.b}).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
     } else {
       res.redirect("/");
     }
@@ -217,7 +217,13 @@ module.exports = (app, db) => {
       }
 
       db.get("clubs").find({ link: req.params.clubLink }).assign({ hits: db.get("clubs").find({ link: req.params.clubLink }).get("hits").value() + 1 }).write();
-      res.render("viewClub", { club: db.get("clubs").find({ link: req.params.clubLink }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
+      let club = db.get("clubs").find({ link: req.params.clubLink }).value();
+
+      if (club) {
+        res.render("viewClub", { club: db.get("clubs").find({ link: req.params.clubLink }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
+      } else {
+        res.redirect("/");
+      }
     }
   });
 

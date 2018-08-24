@@ -35,7 +35,7 @@
   </nav>
 
   <form class="m-auto" action="/api/login" method="post">
-    <p class="h4 text-center mb-4">Sign in</p>
+    <h3 class="font-weight-light text-center mb-4">Sign in</h3>
 
     <label for="username" class="grey-text">Username</label>
     <input type="username" id="username" class="form-control" name="username">
@@ -52,16 +52,16 @@
 
   <p class="text-center m-3">No account? <a href="/createAccount">Create one</a></p>
 
-  <div class="d-flex justify-content-around m-5 text-center animated bounceInUp">
-    <div>
+  <div class="d-flex justify-content-around m-5 text-center animated bounceInUp flex-wrap text-nowrap">
+    <div class="m-5">
       <h4><b>Members:</b> <%= members %></h4>
       <i class="fas fa-users fa-4x"></i>
     </div>
-    <div>
+    <div class="m-5">
       <h4><b>Games:</b> <%= games %></h4>
       <i class="fas fa-chess-knight fa-4x"></i>
     </div>
-    <div>
+    <div class="m-5">
       <h4><b>Users online:</b> <%= online %></h4>
       <i class="fas fa-globe-americas fa-4x"></i>
     </div>
@@ -77,6 +77,13 @@
   form {
     max-width: 30%;
     min-width: 500px;
+  }
+
+  @media only screen and (max-width: 600px) {
+    form {
+      max-width: 90%;
+      min-width: 90%;
+    }
   }
 </style>
 

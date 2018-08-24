@@ -23,8 +23,10 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/gameChallenge", (req, res) => {
     if (req.user) {
       if (req.body.opponent !== req.user.name) {
+        let id = db.get("games").size().value() + 1;
+        
         db.get("games").push({
-          gameId: db.get("games").size().value() + 1,
+          gameId: id,
           dateCreated: "7/10/18",
           fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
           w: req.user.name,
@@ -43,7 +45,7 @@ module.exports = (app, db, bcrypt, passport) => {
           drawRequestedBy: null
         }).write();
 
-        res.json({ status: 200, id: id.toString() });
+        res.json({status: 200, id: id})
       } else {
         res.sendStatus(401);
       }

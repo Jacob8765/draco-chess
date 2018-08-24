@@ -19,6 +19,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/countdown/2.6.0/countdown.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 </head>
 
 <body>
@@ -63,9 +64,15 @@
     </div>
   </nav>
 
-  <div class="w-75 m-auto text-center">
-      <h6><i><%= game.w %></i> | Time remaining: <b id="wTime"><%= game.wTime %></b></h6>
-      <h6><i><%= game.b %></i> | Time remaining: <b id="bTime"><%= game.bTime %></b></h6>
+  <div class="text-center d-flex justify-content-around flex-wrap">
+    <div>
+      <a href="/profile/<%= white.name %>"><div class="profile-img white-profile m-auto" title="<%= white.name %>"></div></a>
+      <p id="wTime" class="<%= game[game.currentTurn] == white.name ? 'font-weight-bold' : '' %>"><%= game.wTime %></p>
+    </div>
+    <div>
+      <a href="/profile/<%= black.name %>"><div class="profile-img black-profile m-auto" title="<%= black.name %>"></div></a>
+      <p id="bTime" class="<%= game[game.currentTurn] == black.name ? 'font-weight-bold' : '' %>"><%= game.bTime %></p>
+    </div>
   </div>
 
   <div id="board"></div>
@@ -135,6 +142,23 @@
   #chatMessages {
     max-height: 200px;
     overflow-y: scroll;
+  }
+
+  .profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+
+    background-size: cover;
+    background-position: center center;
+  }
+
+  .white-profile {
+    background-image: url("<%= white.profile.picture %>");
+  }
+
+  .black-profile {
+    background-image: url("<%= black.profile.picture %>");
   }
 </style>
 
@@ -229,12 +253,6 @@
 
     if (game.in_checkmate()) {
       status = 'Game over, ' +  (gameObj[game.turn()] !== user ? gameObj[game.turn()] + ' is in checkmate.' : "you are in checkmate");
-
-      socket.emit("gameEvent", {
-        gameId: gameObj.gameId,
-        event: "checkmate",
-        winner: game.turn()
-      });
     } else if (game.in_draw()) {
       status = 'Game over, drawn position';
     } else if (gameObj.isOver) {
@@ -279,6 +297,12 @@
       game.load(data.fen);
       board.position(data.fen);
       fen = data.fen;
+
+      if (game.in_checkmate()) {
+        gameEvent("checkmate");
+      } else if (game.in_draw()) {
+        gameEvent("draw");
+      }
   
       updateStatus();
     }
@@ -311,7 +335,7 @@
   setCountdown = (turn) => {
     if (wTimeMilliseconds > 0 || bTimeMilliseconds > 0) {
       timeCountdown = countdown(Date.now() + (turn == "w" ? wTimeMilliseconds : bTimeMilliseconds), (ts) => {
-        document.getElementById(turn + "Time").innerHTML = (ts.weeks > 0 ? ts.weeks + " Weeks " : "") + (ts.days > 0 ? ts.days + " Days " : "") + (ts.hours > 0 ? ts.hours + " Hours " : "") + (ts.minutes > 0 ? ts.minutes + " Minutes " : "") + ts.seconds + " Seconds ";
+        document.getElementById(turn + "Time").innerHTML = (ts.weeks > 0 ? ts.weeks + " Weeks " : "") + (ts.days > 0 ? ts.days + " Days " : "") + (ts.hours > 0 ? ts.hours + " Hours " : "") + ts.minutes + " Minutes";
 
         switch(turn) {
           case "w":
@@ -336,6 +360,39 @@
 
   gameEvent = (event) => {
     console.log("Event: " + event);
+
+    if (event == "resign") {
+      swal({
+        title: "Are you sure?",
+        text: "Are you sure you want to resign from the game?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+      .then((willResign) => {
+        if (willResign) {
+          submitGameEvent("resign")
+        }
+      });
+    } else if (event == "acceptDraw") {
+      swal({
+        title: "Are you sure?",
+        text: "Are you sure you want to accept the draw?",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+      .then((willResign) => {
+        if (willResign) {
+          submitGameEvent("acceptDraw")
+        }
+      });
+    } else {
+      submitGameEvent(event);
+    }
+  }
+
+  submitGameEvent = (event) => {
     axios.post('/api/gameEvent', {
       event: event,
       id: gameObj.gameId
@@ -362,7 +419,6 @@
       console.log(error);
     });
   }
-
 
   updateStatus();
 </script>

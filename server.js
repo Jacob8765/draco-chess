@@ -77,10 +77,7 @@ db.defaults({
         },
         pending: false,
         id: 2,
-        club: {
-          status: "owner",
-          name: "Test Club",
-        }
+        club: {}
       }
     ],
   },
