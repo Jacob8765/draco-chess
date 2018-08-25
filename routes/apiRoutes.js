@@ -24,7 +24,7 @@ module.exports = (app, db, bcrypt, passport) => {
     if (req.user) {
       if (req.body.opponent !== req.user.name) {
         let id = db.get("games").size().value() + 1;
-        
+
         db.get("games").push({
           gameId: id,
           dateCreated: "7/10/18",
@@ -45,7 +45,7 @@ module.exports = (app, db, bcrypt, passport) => {
           drawRequestedBy: null
         }).write();
 
-        res.json({status: 200, id: id})
+        res.json({ status: 200, id: id })
       } else {
         res.sendStatus(401);
       }
@@ -87,7 +87,7 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/gameChat", (req, res) => {
     if (req.user) {
       if (db.get("games").find({ gameId: Number(req.body.id) }).get("w").value() == req.user.name || db.get("games").find({ gameId: Number(req.body.id) }).get("b").value() == req.user.name) {
-        db.get('games').find({ gameId: req.body.id }).get("messages").push({ user: req.user.name, message: req.body.message }).write();
+        db.get('games').find({ gameId: req.body.id }).get("messages").push({ user: req.user.name, message: req.body.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }).write();
         res.sendStatus(200);
       } else {
         res.sendStatus(401);
@@ -102,7 +102,7 @@ module.exports = (app, db, bcrypt, passport) => {
       let id = Math.floor(100000000000000 + Math.random() * 90000000000000);
 
       db.get("members.members").find({ name: req.body.to }).get("notifications.messages").push({ id: id }).write();
-      db.get("members.members").find({ name: req.body.to }).get("messages").push({ from: req.user.name, date: "7/22/18", message: req.body.message, id: id }).write();
+      db.get("members.members").find({ name: req.body.to }).get("messages").push({ from: req.user.name, date: "7/22/18", message: req.body.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'), id: id }).write();
 
       res.sendStatus(200);
     } else {
@@ -144,27 +144,29 @@ module.exports = (app, db, bcrypt, passport) => {
 
             if (files.profilePic.name) {
               if (fs.statSync(files.profilePic.path).size / 1000000 < db.get("config.profilePicMaxSize").value()) {
+                if (extention && ".jpg" || extention == ".png" || extention && ".gif" || extention == ".bmp") {
 
-                if (currentProfile == "/profile/" + req.user.name + extention) {
-                  fs.unlink(__dirname.replace("routes", "public/profile/") + req.user.name + extention, (err) => {
+                  if (currentProfile == "/profile/" + req.user.name + extention) {
+                    fs.unlink(__dirname.replace("routes", "public/profile/") + req.user.name + extention, (err) => {
+                      if (err) console.log(err);
+                    });
+                  }
+
+                  let profilePath = "/profile/" + req.user.name + files.profilePic.name.substring(files.profilePic.name.length - 4);
+                  db.get("members.members").find({ name: req.user.name }).get("profile").assign({ picture: profilePath }).write();
+
+                  newpath = __dirname.replace("routes", "public/profile/") + req.user.name + files.profilePic.name.substring(files.profilePic.name.length - 4);
+                  oldpath = files.profilePic.path;
+
+                  fs.copyFile(oldpath, newpath, (err) => {
                     if (err) console.log(err);
                   });
                 }
 
-                let profilePath = "/profile/" + req.user.name + files.profilePic.name.substring(files.profilePic.name.length - 4);
-                db.get("members.members").find({ name: req.user.name }).get("profile").assign({ picture: profilePath }).write();
-
-                newpath = __dirname.replace("routes", "public/profile/") + req.user.name + files.profilePic.name.substring(files.profilePic.name.length - 4);
-                oldpath = files.profilePic.path;
-
-                fs.copyFile(oldpath, newpath, (err) => {
+                fs.unlink(files.profilePic.path, (err) => {
                   if (err) console.log(err);
                 });
               }
-
-              fs.unlink(files.profilePic.path, (err) => {
-                if (err) console.log(err);
-              });
             }
           });
 

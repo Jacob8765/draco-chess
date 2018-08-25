@@ -1,0 +1,32 @@
+body {
+  background-color: #fafafa;
+}
+
+#board {
+  max-width: 35%;
+  min-width: 600px;
+  margin: 50px auto 10px auto !important;
+}
+
+#chat {
+  max-width: 35%;
+  min-width: 600px;
+  margin: 25px auto 10px auto !important;
+}
+
+#chatMessages {
+  max-height: 200px;
+  overflow-y: scroll;
+}
+
+.profile-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  background-size: cover;
+  background-position: center center;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

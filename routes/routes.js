@@ -8,7 +8,7 @@ module.exports = (app, db) => {
       }
     });
 
-    res.render("login", { config: db.get("config").value(), online: onlineUsers, games: db.get("games").size().value(), members: db.get("members.members").size().value() });
+    res.render("login", { config: db.get("config").value(), online: onlineUsers, games: db.get("games").filter({isChallenge: false}).size().value(), members: db.get("members.members").size().value() });
   });
 
   app.get("/", (req, res) => {
