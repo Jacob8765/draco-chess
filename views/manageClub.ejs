@@ -239,7 +239,7 @@
           document.getElementById("clubText").focus();
           break;
         case "image":
-          document.getElementById("clubText").value += "!(image_url)";
+          document.getElementById("clubText").value += "![Image](image_url)";
           document.getElementById("clubText").focus();
           break;
         case "h1":
@@ -351,6 +351,8 @@
       });   
     }
   }
+
+  updatePreview()
 </script>
 
 </html>

@@ -70,7 +70,7 @@
   <% if (chessClubs > 0) { %>
     <h3 class="m-5 text-center">Chess Clubs</h3>
 
-    <table class="table table-hover w-75 m-auto p-3">
+    <table class="table table-striped w-75 m-auto p-3">
       <thead>
         <tr>
           <th>Name</th>
@@ -81,7 +81,7 @@
       <tbody id="chessClubsTable">
         <% clubs.map((club) => { %>
           <% if (club.name) { %>
-            <tr onClick="window.location = '/clubs/<%= club.link %>'">
+            <tr onClick="window.location = '/clubs/<%= club.link %>'" class="cursor-pointer" title="Open message">
               <td><%= club.name %></td>
               <td><%= new Date(club.dateCreated).toLocaleDateString("en-US") %></td>
             </tr>

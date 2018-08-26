@@ -64,7 +64,7 @@
 
     <div class="d-flex justify-content-center">
       <button class="btn btn-success m-3" data-toggle="modal" data-target="#messageModal"><i class="fas fa-reply mr-1"></i> Reply</button>
-      <button class="btn btn-info m-3"><i class="fas fa-bookmark mr-1"></i> Save Message</button>
+      <button class="btn btn-info m-3" onClick="saveMessage()"><i class="fas fa-bookmark mr-1"></i> Save Message</button>
       <button class="btn btn-danger m-3" onClick="deleteMessage()"><i class="fas fa-trash-alt mr-1"></i> Delete</button>
     </div>
   </div>
@@ -131,13 +131,23 @@
       id: <%- JSON.stringify(id) %>
     })
     .then(function (response) {
-      console.log(response);
+      window.location = "/messages";
     })
     .catch(function (error) {
       console.log(error);
     });
+  }
 
-    window.location = "/messages";
+  saveMessage = () => {
+    axios.post('/api/saveMessage', {
+      id: <%- JSON.stringify(id) %>
+    })
+    .then(function (response) {
+      window.location = "/messages";
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
   }
 
   socket.on("message", (data) => {

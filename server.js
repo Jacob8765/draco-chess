@@ -15,7 +15,7 @@ app.use(express.static(__dirname + '/public/'));
 app.use(session({ secret: 'thisisasecretkey', saveUninitialized: false, resave: false })); // session secret
 
 app.use(passport.initialize());
-app.use(passport.session()); // persistent login sessions
+app.use(passport.session());
 
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
@@ -39,7 +39,10 @@ db.defaults({
         lastName: "Doe",
         dateJoined: new Date(Date.now()).toLocaleDateString("en-US"),
         password: "$2a$10$rleM.UPbml66e/Okd.xZFOzvnXGV29otv9W9AexN3/vrd99vlyQze",
-        messages: [],
+        messages: {
+          messages: [],
+          savedMessages: []
+        },
         notifications: { messages: [] },
         isAdmin: false,
         lastVisited: 0,
@@ -64,7 +67,10 @@ db.defaults({
         lastName: "Smith",
         dateJoined: new Date(Date.now()).toLocaleDateString("en-US"),
         password: "$2a$10$rleM.UPbml66e/Okd.xZFOzvnXGV29otv9W9AexN3/vrd99vlyQze",
-        messages: [],
+        messages: {
+          messages: [],
+          savedMessages: []
+        },
         notifications: { messages: [] },
         isAdmin: true,
         lastVisited: 0,
@@ -89,7 +95,21 @@ db.defaults({
   config: {
     siteName: "DracoChess",
     profilePicMaxSize: 5,
-    requireApproval: true
+    requireApproval: true,
+    gameTimes: [
+      {
+        text: "Short (30 minutes)",
+        milliseconds: 1800000
+      },
+      {
+        text: "Normal (2 hours)",
+        milliseconds: 7200000
+      },
+      {
+        text: "Long (3 days)",
+        milliseconds: 259200000
+      }
+    ]
   }
 }).write();
 

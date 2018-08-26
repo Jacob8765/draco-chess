@@ -154,9 +154,9 @@
                 <div class="form-group">
                   <label for="playerName">Time:</label>
                   <select class="form-control" id="time">
-                    <option>Short (5 minutes)</option>
-                    <option>Normal (1 hour)</option>
-                    <option>Long (3 days)</option>
+                    <% config.gameTimes.map((option) => { %>
+                      <option value="<%= option.milliseconds %>"><%= option.text %></option>
+                    <% }) %>
                   </select>
                 </div>
                 </form>
@@ -201,21 +201,9 @@
     let time = document.getElementById("time").value;
     let timeInMilliseconds = 0;
 
-    switch(time) {
-      case "Short (5 minutes)":
-        timeInMilliseconds = 300000;
-        break;
-      case "Normal (1 hour)":
-        timeInMilliseconds = 3600000;
-        break;
-      case "Long (3 days)":
-        timeInMilliseconds = 259200000;
-        break;
-    }
-
     axios.post('/api/gameChallenge', {
       opponent: player,
-      time: timeInMilliseconds
+      time: Number(time)
     })
     .then(function (response) {
       $("#noGames").addClass("d-none");

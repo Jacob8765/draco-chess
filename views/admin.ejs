@@ -84,10 +84,22 @@
                 <input type="number" class="form-control" id="upload" value="<%= config.profilePicMaxSize %>" name="upload" required>
               </div>
 
-              <div class="custom-control custom-checkbox m-2">
+              <div class="custom-control custom-checkbox my-2">
                 <input type="checkbox" class="custom-control-input" id="requireApproval" name="requireApproval">
                 <label class="custom-control-label" for="requireApproval">Require approval for new members</label>
               </div>
+
+              <p class="mt-4 mb-2 font-weight-light">Game times</p>
+              <% config.gameTimes.map((option, index) => { %>
+                <div class="form-row my-1">
+                  <div class="col">
+                    <input type="text" class="form-control" placeholder="Text to be displayed eg. 'Short (30 minutes)'" value="<%= option.text %>" name="text<%= index %>">
+                  </div>
+                  <div class="col">
+                    <input type="number" class="form-control" placeholder="Time in milliseconds" value="<%= option.milliseconds %>" name="milliseconds<%= index %>">
+                  </div>
+                </div>
+              <% }) %>
 
               <div class="m-4 d-flex justify-content-center">
                 <button class="btn btn-success btn-lg" type="submit"><i class="fas fa-paper-plane mr-1"></i> Submit</button>

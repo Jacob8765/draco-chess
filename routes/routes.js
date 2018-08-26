@@ -8,7 +8,7 @@ module.exports = (app, db) => {
       }
     });
 
-    res.render("login", { config: db.get("config").value(), online: onlineUsers, games: db.get("games").filter({isChallenge: false}).size().value(), members: db.get("members.members").size().value() });
+    res.render("login", { config: db.get("config").value(), online: onlineUsers, games: db.get("games").filter({ isChallenge: false }).size().value(), members: db.get("members.members").size().value() });
   });
 
   app.get("/", (req, res) => {
@@ -55,27 +55,33 @@ module.exports = (app, db) => {
   });
 
   app.get("/messages", (req, res) => {
-    if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
-      db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
-    }
-
     if (!req.user) {
       res.redirect("/login");
-    } else if (req.user.pending) {
-      res.redirect("/accountPending");
-    } else if (!req.query.id) {
-      res.render("messages", { user: db.get("members.members").find({ id: req.user.id }).value(), messages: db.get("members.members").find({ name: req.user.name }).get("messages").value(), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
     } else {
-      let message = db.get("members.members").find({ name: req.user.name }).get("messages").find({ id: Number(req.query.id) }).value();
-
-      if (message) {
-        if (db.get("members.members").find({ name: req.user.name }).get("notifications.messages").find({ id: Number(req.query.id) }).value()) {
-          db.get("members.members").find({ name: req.user.name }).get("notifications.messages").remove({ id: Number(req.query.id) }).write();
+      if (req.user.pending) {
+        res.redirect("/accountPending");
+      } else if (!req.query.id) {
+        if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
+          db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
         }
 
-        res.render("viewMessage", { message: message.message, from: message.from, id: message.id, user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() })
+        res.render("messages", { user: db.get("members.members").find({ id: req.user.id }).value(), messages: db.get("members.members").find({ id: req.user.id }).get("messages.messages").value(), savedMessages: db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").value(), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
       } else {
-        res.redirect("/")
+        if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
+          db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
+        }
+
+        let message = db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.query.id) }).value();
+
+        if (message) {
+          if (db.get("members.members").find({ name: req.user.name }).get("notifications.messages").find({ id: Number(req.query.id) }).value()) {
+            db.get("members.members").find({ name: req.user.name }).get("notifications.messages").remove({ id: Number(req.query.id) }).write();
+          }
+
+          res.render("viewMessage", { message: message.message, from: message.from, id: message.id, user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() })
+        } else {
+          res.redirect("/")
+        }
       }
     }
   });
@@ -140,7 +146,7 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      res.render("game", { game: game, user: db.get("members.members").find({ id: req.user.id }).value(), white: db.get("members.members").find({name: game.w}).value(), black: db.get("members.members").find({name: game.b}).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
+      res.render("game", { game: game, user: db.get("members.members").find({ id: req.user.id }).value(), white: db.get("members.members").find({ name: game.w }).value(), black: db.get("members.members").find({ name: game.b }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
     } else {
       res.redirect("/");
     }

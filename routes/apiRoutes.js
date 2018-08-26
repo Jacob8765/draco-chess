@@ -87,7 +87,7 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/gameChat", (req, res) => {
     if (req.user) {
       if (db.get("games").find({ gameId: Number(req.body.id) }).get("w").value() == req.user.name || db.get("games").find({ gameId: Number(req.body.id) }).get("b").value() == req.user.name) {
-        db.get('games').find({ gameId: req.body.id }).get("messages").push({ user: req.user.name, message: req.body.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }).write();
+        db.get('games').find({ gameId: req.body.id }).get("messages").push({ user: req.user.name, message: req.body.message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }).write();
         res.sendStatus(200);
       } else {
         res.sendStatus(401);
@@ -99,10 +99,10 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/sendMessage", (req, res) => {
     if (req.user) {
-      let id = Math.floor(100000000000000 + Math.random() * 90000000000000);
+      let id = db.get("members.members").find({ name: req.body.to }).get("messages.messages").size().value() + 1;
 
       db.get("members.members").find({ name: req.body.to }).get("notifications.messages").push({ id: id }).write();
-      db.get("members.members").find({ name: req.body.to }).get("messages").push({ from: req.user.name, date: "7/22/18", message: req.body.message.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'), id: id }).write();
+      db.get("members.members").find({ name: req.body.to }).get("messages.messages").push({ from: req.user.name, date: "7/22/18", message: req.body.message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'), id: id }).write();
 
       res.sendStatus(200);
     } else {
@@ -112,12 +112,22 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/deleteMessage", (req, res) => {
     if (req.user) {
-      if (db.get("members.members").find({ name: req.user.name }).get("messages").find({ id: Number(req.body.id) }).value()) {
-        db.get("members.members").find({ name: req.user.name }).get("messages").remove({ id: Number(req.body.id) }).write();
+      if (db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.body.id) }).value()) {
+        db.get("members.members").find({ name: req.user.name }).get("messages.messages").remove({ id: Number(req.body.id) }).write();
         res.sendStatus(200);
       } else {
         res.sendStatus(401);
       }
+    } else {
+      res.sendStatus(401);
+    }
+  });
+
+  app.post("/api/saveMessage", (req, res) => {
+    if (req.user) {
+      db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").push(db.get("members.members").find({ id: req.user.id }).get("messages.messages").find({ id: Number(req.body.id) }).value()).write();
+      db.get("members.members").find({ id: req.user.id }).get("messages.messages").remove({ id: Number(req.body.id) }).write();
+      res.sendStatus(200);
     } else {
       res.sendStatus(401);
     }
@@ -307,6 +317,12 @@ module.exports = (app, db, bcrypt, passport) => {
     if (req.user) {
       if (req.user.isAdmin) {
         db.get("config").assign({ siteName: req.body.siteName, profilePicMaxSize: req.body.upload, requireApproval: (req.body.requireApproval ? true : false) }).write();
+        db.get("config").assign({gameTimes: []}).write();
+
+        for (let i = 0; i < 3; i++) {
+          db.get("config.gameTimes").push({text: req.body["text" + i], milliseconds: req.body["milliseconds" + i]}).write();
+        }
+
         res.redirect("/admin");
       } else {
         res.sendStatus(401);
@@ -320,7 +336,7 @@ module.exports = (app, db, bcrypt, passport) => {
     if (req.user) {
       db.get("clubs").push({
         name: req.body.name,
-        link: req.body.name.replace(" ", "-").toLowerCase(),
+        link: req.body.name.replace(" ", "-").replace("'", "").replace('"', "").toLowerCase(),
         owner: req.user.id,
         dateCreated: Date.now(),
         text: "",
@@ -328,7 +344,7 @@ module.exports = (app, db, bcrypt, passport) => {
         members: []
       }).write();
 
-      db.get("members.members").find({ name: req.user.name }).get("club").assign({ status: "owner", name: req.body.name }).write();
+      db.get("members.members").find({ name: req.user.name }).get("club").assign({ status: "owner", name: req.body.name, link: req.body.name.replace(" ", "-").replace("'", "").replace('"', "").toLowerCase() }).write();
       res.sendStatus(200);
     } else {
       res.sendStatus(401);
@@ -339,7 +355,7 @@ module.exports = (app, db, bcrypt, passport) => {
     if (req.user) {
       if (db.get("clubs").find({ name: req.body.clubName }).value()) {
         db.get("clubs").find({ name: req.body.clubName }).get("members").push({ name: req.user.name, pending: true }).write();
-        db.get("members.members").find({ name: req.user.name }).get("club").assign({ status: "pending", name: req.body.clubName }).write();
+        db.get("members.members").find({ name: req.user.name }).get("club").assign({ status: "pending", name: req.body.clubName, link: db.get("clubs").find({ name: req.body.clubName }).get("link").value() }).write();
         res.sendStatus(200);
       } else {
         res.sendStatus(401);
@@ -351,7 +367,7 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/updateClubText", (req, res) => {
     if (req.user) {
-      if (req.user.club.status == "owner") {
+      if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner") {
         db.get("clubs").find({ owner: req.user.id }).assign({ text: req.body.clubText }).write();
         res.redirect("/manageClub");
       } else {

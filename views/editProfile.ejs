@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/css/mdb.min.css" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
   
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
@@ -64,7 +65,7 @@
 
   <form action="/api/updateProfile" method="post" enctype="multipart/form-data" onSubmit="return validateForm()">
     <div class="text-center m-auto">
-      <div class="mx-auto my-3 hoverable profile-img"></div>
+      <div class="mx-auto my-3 hoverable profile-img" style="background-image: url('<%= profile.profile.picture %>'); width: 150px; height: 150px; border-radius: 75px"></div>
 
       <div class="btn btn-dark btn-lg upload">
         <span><i class="fas fa-upload mr-1"> </i>Upload</span>
@@ -158,21 +159,25 @@
               <option><%= club.name %></option>
             <% }) %>
           </select>
+
+          <div class="m-2 d-flex justify-content-center">
+            <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="joinClub()"><i class="fas fa-chess mr-1"></i> Join Club</button>
+          </div>
+
           <hr>
           <h6 class="m-3 text-center"><b>Create Club</b></h6>
           <div class="m-2 d-flex justify-content-center">
-            <button type="button" class="btn btn-default" data-dismiss="modal" data-toggle="modal" data-target="#createClub"><i class="fas fa-plus mr-1"></i> Create Club</button>
+            <button type="button" class="btn btn-default" onClick="createClub()" data-dismiss="modal"><i class="fas fa-plus mr-1"></i> Create Club</button>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="joinClub()"><i class="fas fa-chess mr-1"></i> Join Club</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="modal fade" id="createClub" tabindex="-1" role="dialog" aria-labelledby="createClub" aria-hidden="true">
+  <%# <div class="modal fade" id="createClub" tabindex="-1" role="dialog" aria-labelledby="createClub" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -193,36 +198,7 @@
       </div>
     </div>
   </div>
-</div>
-
-  <style>
-    .profile-img {
-      width: 200px;
-      height: 200px;
-      border-radius: 100px;
-
-      background-image: url("<%= profile.profile.picture %>");
-      background-size: cover;
-      background-position: center center;
-    }
-
-    .upload {
-      position: relative;
-      overflow: hidden;
-      margin: 10px;
-    }
-
-    .upload input {
-      position: absolute;
-      top: 0;
-      right: 0;
-      margin: 0;
-      padding: 0;
-      font-size: 20px;
-      cursor: pointer;
-      opacity: 0;
-    }
-  </style>
+</div> %>
 </body>
 
 <script>
@@ -334,18 +310,26 @@
   }
 
   createClub = () => {
-    let clubName = document.getElementById("clubName").value;
-
-    axios.post('/api/createClub', {
-      name: clubName
+    swal({
+      text: 'Enter the name of your club.',
+      content: "input",
+      button: {
+        text: "Create Club",
+        closeModal: true,
+      },
     })
-    .then(function (response) {
-      console.log(response);
-      window.location = "/manageClub";
-    })
-    .catch(function (error) {
-      console.log(error);
-    });  
+    .then(name => {
+      axios.post('/api/createClub', {
+        name: name
+      })
+      .then(function (response) {
+        console.log(response);
+        window.location = "/manageClub";
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    });
   }
 </script>
 
