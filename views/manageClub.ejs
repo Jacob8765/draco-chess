@@ -154,22 +154,22 @@
             <div class="tab-content" id="tabContent">
               <div class="tab-pane fade show active" id="edit" role="tabpanel" aria-labelledby="edit-tab">
                 <div class="btn-group m-2 d-flex justify-content-center" role="group">
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('bold')"><i class="fas fa-bold"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('italic')"><i class="fas fa-italic"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('underline')"><i class="fas fa-underline"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('strikethrough')"><i class="fas fa-strikethrough"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('link')"><i class="fas fa-link"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('image')"><i class="far fa-image"></i></button>
+                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('**bold**')"><i class="fas fa-bold"></i></button>
+                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('*italic*')"><i class="fas fa-italic"></i></button>
+                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('__underline__')"><i class="fas fa-underline"></i></button>
+                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('~~strikethrough~~')"><i class="fas fa-strikethrough"></i></button>
+                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('[Display text](url)')"><i class="fas fa-link"></i></button>
+                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('![Image](image_url)')"><i class="far fa-image"></i></button>
                   <button id="headingDropdown" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Headings
                   </button>
                   <div class="dropdown-menu" aria-labelledby="headingDropdown">
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('h1')">Heading 1</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('h2')">Heading 2</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('h3')">Heading 3</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('h4')">Heading 4</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('h5')">Heading 5</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('h6')">Heading 6</a>
+                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('# heading1')">Heading 1</a>
+                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('## heading2')">Heading 2</a>
+                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('### heading3')">Heading 3</a>
+                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('#### heading4')">Heading 4</a>
+                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('##### heading5')">Heading 5</a>
+                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('###### heading6')">Heading 6</a>
                   </div>
                 </div>
 
@@ -216,57 +216,9 @@
   if (user.club.status == "owner") {
     document.getElementById("preview").innerHTML = marked(<%- JSON.stringify(club.text) %>);
 
-    insertFormatting = (format) => {
-      switch (format) {
-        case "italic":
-          document.getElementById("clubText").value += "*italic*";
-          document.getElementById("clubText").focus();
-          break;
-        case "bold":
-          document.getElementById("clubText").value += "**bold**";
-          document.getElementById("clubText").focus();
-          break;
-        case "underline":
-          document.getElementById("clubText").value += "__underline__";
-          document.getElementById("clubText").focus();
-          break;
-        case "strikethrough":
-          document.getElementById("clubText").value += "~~strikethrough~~";
-          document.getElementById("clubText").focus();
-          break;
-        case "link":
-          document.getElementById("clubText").value += "[Display text](url)";
-          document.getElementById("clubText").focus();
-          break;
-        case "image":
-          document.getElementById("clubText").value += "![Image](image_url)";
-          document.getElementById("clubText").focus();
-          break;
-        case "h1":
-          document.getElementById("clubText").value += "# heading1";
-          document.getElementById("clubText").focus();
-          break;
-        case "h2":
-          document.getElementById("clubText").value += "## heading2";
-          document.getElementById("clubText").focus();
-          break;
-        case "h3":
-          document.getElementById("clubText").value += "### heading3";
-          document.getElementById("clubText").focus();
-          break;
-        case "h4":
-          document.getElementById("clubText").value += "#### heading4";
-          document.getElementById("clubText").focus();
-          break;
-        case "h5":
-          document.getElementById("clubText").value += "###### heading5";
-          document.getElementById("clubText").focus();
-          break;
-        case "h6":
-          document.getElementById("clubText").value += "###### heading6";
-          document.getElementById("clubText").focus();
-          break;
-      }
+    insertFormatting = (formatting) => {
+      document.getElementById("clubText").value += formatting;
+      document.getElementById("clubText").focus();
 
       updatePreview();
     }

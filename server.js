@@ -54,6 +54,7 @@ db.defaults({
           location: "",
         },
         pending: false,
+        deactivated: false,
         id: 1,
         club: {
           status: null,
@@ -75,6 +76,7 @@ db.defaults({
         isAdmin: true,
         lastVisited: 0,
         isOnline: false,
+        deactivated: false,
         profile: {
           picture: "/profile/default.jpg",
           aboutMe: "",
@@ -83,7 +85,10 @@ db.defaults({
         },
         pending: false,
         id: 2,
-        club: {}
+        club: {
+          status: null,
+          name: null,
+        }
       }
     ],
   },

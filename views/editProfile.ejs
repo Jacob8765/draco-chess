@@ -101,7 +101,7 @@
         <a href="/manageClub" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Manage Membership</a>
       <% } %>
 
-      <button type="button" class="btn btn-danger" onClick="deleteAccount()"><i class="fas fa-trash-alt mr-1"></i> Delete Account</button>
+      <button type="button" class="btn btn-danger" onClick="deactivateAccount()"><i class="fas fa-trash-alt mr-1"></i> Deactivate Account</button>
     </div>
 
     <div class="d-flex justify-content-center">
@@ -176,29 +176,6 @@
       </div>
     </div>
   </div>
-
-  <%# <div class="modal fade" id="createClub" tabindex="-1" role="dialog" aria-labelledby="createClub" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="createClub">Create Club</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="clubName">Club Name</label>
-          <input type="text" class="form-control" id="clubName">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onClick="createClub()"><i class="fas fa-plus mr-1"></i> Create Club</button>
-      </div>
-    </div>
-  </div>
-</div> %>
 </body>
 
 <script>
@@ -256,17 +233,17 @@
     }
   }
 
-  deleteAccount = () => {
+  deactivateAccount = () => {
     swal({
       title: "Are you sure?",
-      text: "Your account will be permanently deleted. This action can not be undone!",
+      text: "Your account will be permanently deactivated. This action can not be undone!",
       icon: "warning",
       buttons: true,
       dangerMode: true,
     })
     .then((willDelete) => {
       if (willDelete) {
-        axios.post('/api/deleteMember')
+        axios.post('/api/deactivateMember')
           .then(function (response) {
             swal("Success", "Your account has been successfully deleted", "success")
               .then((value) => {

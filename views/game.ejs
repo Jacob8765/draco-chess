@@ -370,7 +370,6 @@
 
       if (event == "resign" || event == "checkmate" || event == "acceptDraw" ) {
         window.location = window.location;
-        gameObj.isOver = true;
       } else if (event == "requestDraw") {
         document.getElementById("drawText").innerHTML = "Revoke Draw";
         $("#draw").attr('onClick', 'gameEvent("revokeDraw")');

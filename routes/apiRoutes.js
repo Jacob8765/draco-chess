@@ -264,13 +264,13 @@ module.exports = (app, db, bcrypt, passport) => {
     }
   });
 
-  app.post("/api/deleteMember", (req, res) => {
+  app.post("/api/deactivateMember", (req, res) => {
     if (req.user) {
       if (req.user.isAdmin) {
-        db.get("members.members").remove({ name: req.body.name, id: Number(req.body.id) }).write();
+        db.get("members.members").find({ id: Number(req.body.id) }).assign({deactivated: true, club: {status: null, name: null}}).write();
         res.sendStatus(200);
       } else {
-        db.get("members.members").remove({ name: req.user.name }).write();
+        db.get("members.members").find({ id: req.user.id }).assign({deactivated: true, club: {status: null, name: null}}).write();
         res.sendStatus(200);
       }
     } else {

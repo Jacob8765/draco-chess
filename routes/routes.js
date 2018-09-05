@@ -163,19 +163,7 @@ module.exports = (app, db) => {
           db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
         }
 
-        let pendingAccounts = [];
-        let activeAccounts = [];
-        let accounts = db.get("members.members").value();
-
-        accounts.map((account) => {
-          if (account.pending) {
-            pendingAccounts.push(account);
-          } else {
-            activeAccounts.push(account);
-          }
-        });
-
-        res.render("admin", { user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), pendingAccounts: pendingAccounts, accounts: activeAccounts, serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
+        res.render("admin", { user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), pendingAccounts: db.get("members.members").filter({pending: true}).value(), accounts: db.get("members.members").filter({pending: false, deactivated: false}).value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
       } else {
         res.redirect("/");
       }

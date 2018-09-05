@@ -15,7 +15,7 @@ module.exports = function (passport, db, bcrypt) {
       let user = db.get("members.members").find({name: username}).value();
 
       bcrypt.compare(password, user.password, function(err, res) {
-        if (res) {
+        if (res && !user.deactivated) {
           done(null, user);
         } else {
           done(null, false);
