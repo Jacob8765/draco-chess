@@ -98,10 +98,10 @@
       <% } else if (user.club.status == "owner") { %>
         <a href="/manageClub" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Manage Club</a>
       <% } else { %>
-        <a href="/manageClub" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Manage Membership</a>
+        <button class="btn btn-secondary" onClick="leaveClub()"><i class="fas fa-chess mr-1"></i> Leave Club</button>
       <% } %>
 
-      <button type="button" class="btn btn-danger" onClick="deactivateAccount()"><i class="fas fa-trash-alt mr-1"></i> Deactivate Account</button>
+      <button type="button" class="btn btn-danger" onClick="deactivateAccount()"><i class="fas fa-trash-alt mr-1"></i> Delete Account</button>
     </div>
 
     <div class="d-flex justify-content-center">
@@ -236,7 +236,7 @@
   deactivateAccount = () => {
     swal({
       title: "Are you sure?",
-      text: "Your account will be permanently deactivated. This action can not be undone!",
+      text: "Your account will be permanently deleted. This action can not be undone!",
       icon: "warning",
       buttons: true,
       dangerMode: true,
@@ -254,8 +254,6 @@
             swal("Error", "Something went wrong while deleting your account", "error");
             console.log(error);
           });  
-      } else {
-        swal("Your account has not been deleted");
       }
     });
   }

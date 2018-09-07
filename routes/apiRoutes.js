@@ -154,7 +154,7 @@ module.exports = (app, db, bcrypt, passport) => {
 
             if (files.profilePic.name) {
               if (fs.statSync(files.profilePic.path).size / 1000000 < db.get("config.profilePicMaxSize").value()) {
-                if (extention && ".jpg" || extention == ".png" || extention && ".gif" || extention == ".bmp") {
+                if (extention && ".jpg" || extention == ".png" || extention && ".gif") {
 
                   if (currentProfile == "/profile/" + req.user.name + extention) {
                     fs.unlink(__dirname.replace("routes", "public/profile/") + req.user.name + extention, (err) => {
@@ -267,10 +267,10 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/deactivateMember", (req, res) => {
     if (req.user) {
       if (req.user.isAdmin) {
-        db.get("members.members").find({ id: Number(req.body.id) }).assign({deactivated: true, club: {status: null, name: null}}).write();
+        db.get("members.members").find({ id: Number(req.body.id) }).assign({deactivated: true}).write();
         res.sendStatus(200);
       } else {
-        db.get("members.members").find({ id: req.user.id }).assign({deactivated: true, club: {status: null, name: null}}).write();
+        db.get("members.members").find({ id: req.user.id }).assign({deactivated: true}).write();
         res.sendStatus(200);
       }
     } else {

@@ -65,20 +65,17 @@
     <div class="col-3">
       <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
         <a class="nav-link active" id="homeNav" data-toggle="pill" href="#home" role="tab" aria-controls="home" aria-selected="true"><i class="fas fa-home mr-1"></i> Home</a>
-        <% if (user.club.status == "owner") { %>
-          <a class="nav-link" id="manageMembersNav" data-toggle="pill" href="#manageMembers" role="tab" aria-controls="manageMembers" aria-selected="false"><i class="fas fa-user-cog mr-1"></i> Manage Members</a>
-          <a class="nav-link" id="updateClubNav" data-toggle="pill" href="#updateClub" role="tab" aria-controls="updateClub" aria-selected="false"><i class="fas fa-edit mr-1"></i> Update Club</a>
-        <% } %>
+        <a class="nav-link" id="manageMembersNav" data-toggle="pill" href="#manageMembers" role="tab" aria-controls="manageMembers" aria-selected="false"><i class="fas fa-user-cog mr-1"></i> Manage Members</a>
+        <a class="nav-link" id="updateClubNav" data-toggle="pill" href="#updateClub" role="tab" aria-controls="updateClub" aria-selected="false"><i class="fas fa-edit mr-1"></i> Update Club</a>
       </div>
     </div>
     <div class="col-9">
       <div class="tab-content" id="v-pills-tabContent">
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="mx-auto my-3 text-center">
+            <h3 class="font-weight-light text-center m-2">Total number of visits: <%= club.hits %>
             <div class="d-flex justify-content-center">
-              <% if (user.club.status == "owner") { %>
-                <button class="btn btn-danger" onClick="deleteClub()"><i class="fas fa-trash-alt mr-1"></i> Delete Club</button>
-              <% } %>
+              <button class="btn btn-danger" onClick="deleteClub()"><i class="fas fa-trash-alt mr-1"></i> Delete Club</button>
             </div>
           </div>
         </div>
@@ -139,54 +136,55 @@
           <% } %>
         </div>
 
-        <% if (user.club.status == "owner") { %>
-          <div class="tab-pane fade" id="updateClub" role="tabpanel" aria-labelledby="update-club-tab">
-            <h3 class="m-4 text-center font-weight-light">Update Club</h3>
+        <div class="tab-pane fade" id="updateClub" role="tabpanel" aria-labelledby="update-club-tab">
+          <h3 class="m-4 text-center font-weight-light">Update Club</h3>
 
-            <ul class="nav nav-tabs mb-5" id="editPreviewTabs" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link active" id="edit-tab" data-toggle="tab" href="#edit" role="tab" aria-controls="edit" aria-selected="true">Edit</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id="preview-tab" data-toggle="tab" href="#preview" role="tab" aria-controls="preview" aria-selected="false">Preview</a>
-              </li>
-            </ul>
-            <div class="tab-content" id="tabContent">
-              <div class="tab-pane fade show active" id="edit" role="tabpanel" aria-labelledby="edit-tab">
-                <div class="btn-group m-2 d-flex justify-content-center" role="group">
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('**bold**')"><i class="fas fa-bold"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('*italic*')"><i class="fas fa-italic"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('__underline__')"><i class="fas fa-underline"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('~~strikethrough~~')"><i class="fas fa-strikethrough"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('[Display text](url)')"><i class="fas fa-link"></i></button>
-                  <button type="button" class="btn btn-secondary" onClick="insertFormatting('![Image](image_url)')"><i class="far fa-image"></i></button>
-                  <button id="headingDropdown" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Headings
-                  </button>
-                  <div class="dropdown-menu" aria-labelledby="headingDropdown">
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('# heading1')">Heading 1</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('## heading2')">Heading 2</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('### heading3')">Heading 3</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('#### heading4')">Heading 4</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('##### heading5')">Heading 5</a>
-                    <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('###### heading6')">Heading 6</a>
-                  </div>
+          <ul class="nav nav-tabs mb-5" id="editPreviewTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="edit-tab" data-toggle="tab" href="#edit" role="tab" aria-controls="edit" aria-selected="true">Edit</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="preview-tab" data-toggle="tab" href="#preview" role="tab" aria-controls="preview" aria-selected="false">Preview</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="tabContent">
+            <div class="tab-pane fade show active" id="edit" role="tabpanel" aria-labelledby="edit-tab">
+              <div class="btn-group m-2 d-flex justify-content-center" role="group">
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('**bold**')"><i class="fas fa-bold"></i></button>
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('*italic*')"><i class="fas fa-italic"></i></button>
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('__underline__')"><i class="fas fa-underline"></i></button>
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('~~strikethrough~~')"><i class="fas fa-strikethrough"></i></button>
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('<p class=\'text-left\'></p>')"><i class="fas fa-align-left"></i></button>
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('<p class=\'text-center\'></p>')"><i class="fas fa-align-center"></i></button>
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('<p class=\'text-right\'></p>')"><i class="fas fa-align-right"></i></button>
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('[Display text](url)')"><i class="fas fa-link"></i></button>
+                <button type="button" class="btn btn-secondary" onClick="insertFormatting('![Image](image_url)')"><i class="far fa-image"></i></button>
+                <button id="headingDropdown" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Headings
+                </button>
+                <div class="dropdown-menu" aria-labelledby="headingDropdown">
+                  <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('# heading1')">Heading 1</a>
+                  <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('## heading2')">Heading 2</a>
+                  <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('### heading3')">Heading 3</a>
+                  <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('#### heading4')">Heading 4</a>
+                  <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('##### heading5')">Heading 5</a>
+                  <a class="dropdown-item" href="javascript:;" onClick="insertFormatting('###### heading6')">Heading 6</a>
+                </div>
+              </div>
+
+              <form method="post" action="/api/updateClubText">
+                <div class="form-group m-auto">
+                  <textarea class="form-control" id="clubText" name="clubText" onkeyup="updatePreview()" rows="12"><%= club.text %></textarea>
                 </div>
 
-                <form method="post" action="/api/updateClubText">
-                  <div class="form-group m-auto">
-                    <textarea class="form-control" id="clubText" name="clubText" onkeyup="updatePreview()" rows="12"><%= club.text %></textarea>
-                  </div>
-
-                  <div class="m-4 d-flex justify-content-center">
-                    <button class="btn btn-success btn-lg" type="submit"><i class="fas fa-paper-plane mr-1"></i> Update</button>
-                  </div>
-                </form>
-              </div>
-              <div class="tab-pane fade" id="preview" role="tabpanel" aria-labelledby="preview-tab"></div>
+                <div class="m-4 d-flex justify-content-center">
+                  <button class="btn btn-success btn-lg" type="submit"><i class="fas fa-paper-plane mr-1"></i> Update</button>
+                </div>
+              </form>
             </div>
+            <div class="tab-pane fade" id="preview" role="tabpanel" aria-labelledby="preview-tab"></div>
           </div>
-        <% } %>
+        </div>
       </div>
     </div>
   </div>
@@ -213,95 +211,93 @@
     }
   });
 
-  if (user.club.status == "owner") {
-    document.getElementById("preview").innerHTML = marked(<%- JSON.stringify(club.text) %>);
+  document.getElementById("preview").innerHTML = marked(<%- JSON.stringify(club.text) %>);
 
-    insertFormatting = (formatting) => {
-      document.getElementById("clubText").value += formatting;
-      document.getElementById("clubText").focus();
+  insertFormatting = (formatting) => {
+    let element = document.getElementById("clubText");    
+    element.value = element.value.substring(0, element.selectionStart) + formatting + element.value.substring(element.selectionStart);
+    
+    updatePreview();
+  }
 
-      updatePreview();
-    }
+  updatePreview = () => {
+    document.getElementById("preview").innerHTML = marked(document.getElementById("clubText").value.replace(/\n/gi, "<br>"));
+  }
 
-    updatePreview = () => {
-      document.getElementById("preview").innerHTML = marked(document.getElementById("clubText").value);
-    }
+  deleteClub = () => {
+    swal({
+      title: "Are you sure?",
+      text: "Your club will be permanently deleted. This action can not be undone!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        swal({
+          text: 'Enter the name of your club to delete it.',
+          content: "input",
+          button: {
+            text: "Delete Club",
+            closeModal: true,
+          },
+        })
+        .then(name => {
+          if (!name) {
+            throw null;
+          } else if (name == <%- JSON.stringify(club.name) %>) {
 
-    deleteClub = () => {
-      swal({
-        title: "Are you sure?",
-        text: "Your club will be permanently deleted. This action can not be undone!",
-        icon: "warning",
-        buttons: true,
-        dangerMode: true,
-      })
-      .then((willDelete) => {
-        if (willDelete) {
-          swal({
-            text: 'Enter the name of your club to delete it.',
-            content: "input",
-            button: {
-              text: "Delete Club",
-              closeModal: true,
-            },
-          })
-          .then(name => {
-            if (!name) {
-              throw null;
-            } else if (name == <%- JSON.stringify(club.name) %>) {
-  
-              axios.post('/api/deleteClub')
-                .then(function (response) {
-                  swal("Success", "Your club has been successfully deleted", "success")
-                    .then((value) => {
-                      window.location = "/";
-                    });
-                })
-                .catch(function (error) {
-                  swal("Error", "Something went wrong while deleting your account", "error");
-                  console.log(error);
-                });
-            } else {
-              swal("Your club has not been deleted");
-            }
-          });
-        } else {
-          swal("Your club has not been deleted");
-        }
-      }); 
-    }
+            axios.post('/api/deleteClub')
+              .then(function (response) {
+                swal("Success", "Your club has been successfully deleted", "success")
+                  .then((value) => {
+                    window.location = "/";
+                  });
+              })
+              .catch(function (error) {
+                swal("Error", "Something went wrong while deleting your account", "error");
+                console.log(error);
+              });
+          } else {
+            swal("Your club has not been deleted");
+          }
+        });
+      } else {
+        swal("Your club has not been deleted");
+      }
+    }); 
+  }
 
-    removeMember = (name) => {
-      axios.post('/api/leaveClub', {
-        name: name
-      })
-      .then(function (response) {
-        swal("Success", name + "'s account has been successfully removed", "success")
-          .then((value) => {
-            window.location = window.location;
-          });
-      })
-      .catch(function (error) {
-        swal("Error", "Something went wrong while removing " + name + "'s account", "error");
-        console.log(error);
-      });   
-    }
+  removeMember = (name) => {
+    axios.post('/api/leaveClub', {
+      name: name
+    })
+    .then(function (response) {
+      swal("Success", name + "'s account has been successfully removed", "success")
+        .then((value) => {
+          window.location = window.location;
+        });
+    })
+    .catch(function (error) {
+      swal("Error", "Something went wrong while removing " + name + "'s account", "error");
+      console.log(error);
+    });   
+  }
 
-    acceptMember = (name) => {
-      axios.post('/api/acceptClubMember', {
-        name: name
-      })
-      .then(function (response) {
-        swal("Success", name + "'s account has been successfully accepted", "success")
-          .then((value) => {
-            window.location = window.location;
-          });
-      })
-      .catch(function (error) {
-        swal("Error", "Something went wrong while accepting " + name + "'s account", "error");
-        console.log(error);
-      });   
-    }
+  acceptMember = (name) => {
+    axios.post('/api/acceptClubMember', {
+      name: name
+    })
+    .then(function (response) {
+      swal("Success", name + "'s account has been successfully accepted", "success")
+        .then((value) => {
+          window.location = window.location;
+        });
+    })
+    .catch(function (error) {
+      swal("Error", "Something went wrong while accepting " + name + "'s account", "error");
+      console.log(error);
+    });   
   }
 
   updatePreview()

@@ -135,7 +135,7 @@
                     <td><%= account.lastName %></td>
                     <td><%= account.email %></td>
                     <td><%= new Date(account.dateJoined).toLocaleDateString("en-US") %></td>
-                    <td><a href="javascript:;" class="text-success mr-3" onClick="acceptMember('<%= account.name %>', '<%= account.id %>')" title="Accept Member"><i class="fas fa-check-circle fa-lg"></i></a> <a href="javascript:;" class="text-danger" onClick="deleteMember('<%= account.name %>', '<%= account.id %>')" title="Remove Member"><i class="fas fa-times-circle fa-lg"></i></a></td>
+                    <td><a href="javascript:;" class="text-success mr-3" onClick="acceptMember('<%= account.name %>', '<%= account.id %>')" title="Accept Member"><i class="fas fa-check-circle fa-lg"></i></a> <a href="javascript:;" class="text-danger" onClick="deactivateMember('<%= account.name %>', '<%= account.id %>')" title="Decline Account"><i class="fas fa-times-circle fa-lg"></i></a></td>
                   </tr>
                 <%})%>
                 </tbody>
@@ -165,7 +165,7 @@
                     <td><%= account.lastName %></td>
                     <td><%= account.email %></td>
                     <td><%= new Date(account.dateJoined).toLocaleDateString("en-US") %></td>
-                    <td><a href="javascript:;" class="text-danger mr-2" onClick="deleteMember('<%= account.name %>', '<%= account.id %>')" title="Deactivate Member"><i class="fas fa-times-circle fa-lg"></i></a> <a href="javascript:;" class="text-primary mr-2" data-toggle="modal" data-target="#changePassword<%= account.name %>" title="Change Password"><i class="fas fa-key fa-lg"></i></a> <a href="javascript:;" class="brown-text" data-toggle="modal" data-target="#editProfile<%= account.name %>" title="Edit Profile"><i class="fas fa-user-edit fa-lg"></i></a> </td>
+                    <td><a href="javascript:;" class="text-danger mr-2" onClick="deactivateMember('<%= account.name %>', '<%= account.id %>')" title="Delete Member"><i class="fas fa-times-circle fa-lg"></i></a> <a href="javascript:;" class="text-primary mr-2" data-toggle="modal" data-target="#changePassword<%= account.name %>" title="Change Password"><i class="fas fa-key fa-lg"></i></a> <a href="javascript:;" class="brown-text" data-toggle="modal" data-target="#editProfile<%= account.name %>" title="Edit Profile"><i class="fas fa-user-edit fa-lg"></i></a> </td>
                   </tr>
                 <%})%>
                 </tbody>
@@ -330,7 +330,7 @@
     });  
   }
 
-  deleteMember = (name, id) => {
+  deactivateMember = (name, id) => {
     console.log(name, id);
 
     swal({
@@ -342,16 +342,11 @@
     })
     .then((willDelete) => {
       if (willDelete) {
-        axios.post('/api/deleteMember', {
+        axios.post('/api/deactivateMember', {
           name: name,
           id: id
         })
-        .then(function (response) {
-          swal("Success", name + "'s account has been successfully deleted", "success")
-            .then((value) => {
-              window.location = window.location;
-            });
-        })
+          window.location = window.location
         .catch(function (error) {
           swal("Error", "Something went wrong while deleting " + name + "'s account", "error");
           console.log(error);
