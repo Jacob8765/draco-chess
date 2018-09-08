@@ -8,7 +8,7 @@ module.exports = (app, db) => {
       }
     });
 
-    res.render("login", { config: db.get("config").value(), online: onlineUsers, games: db.get("games").filter({ isChallenge: false }).size().value(), members: db.get("members.members").size().value() });
+    res.render("login", { config: db.get("config").value(), online: onlineUsers, games: db.get("games").filter({ isChallenge: false }).size().value(), members: db.get("members.members").filter({ pending: false, deactivated: false }).size().value() });
   });
 
   app.get("/", (req, res) => {
@@ -21,27 +21,7 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      let onlineUsers = []
-      let members = db.get("members.members").value();
-
-      members.map((member) => {
-        if (member.isOnline) {
-          onlineUsers.push(member.name);
-        }
-      });
-
-      let games = [];
-      let gamesDb = db.get("games").value();
-
-      for (var i = 0; i < gamesDb.length; i++) {
-        if (gamesDb[i].w == req.user.name) {
-          games.push(gamesDb[i]);
-        } else if (gamesDb[i].b == req.user.name) {
-          games.push(gamesDb[i]);
-        }
-      }
-
-      res.render("home", { user: db.get("members.members").find({ id: req.user.id }).value(), games: games, players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), onlineUsers: onlineUsers, serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
+      res.render("home", { user: db.get("members.members").find({ id: req.user.id }).value(), games: [...db.get("games").filter({ w: req.user.name }).value().concat(db.get("games").filter({ b: req.user.name }).value())], players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), onlineUsers: db.get("members.members").filter({ isOnline: true }).map("name").value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
     }
   });
 
@@ -163,7 +143,7 @@ module.exports = (app, db) => {
           db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
         }
 
-        res.render("admin", { user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), pendingAccounts: db.get("members.members").filter({pending: true}).value(), accounts: db.get("members.members").filter({pending: false, deactivated: false}).value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
+        res.render("admin", { user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), pendingAccounts: db.get("members.members").filter({ pending: true }).value(), accounts: db.get("members.members").filter({ pending: false, deactivated: false }).value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
       } else {
         res.redirect("/");
       }
