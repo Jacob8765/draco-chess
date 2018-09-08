@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/css/mdb.min.css" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
   
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
@@ -62,7 +63,7 @@
   <div class="w-75 m-auto text-center">
     <h5 class="font-weight-light"><%= message %></h5>
 
-    <div class="d-flex justify-content-center">
+    <div class="d-flex justify-content-center flex-wrap">
       <button class="btn btn-success m-3" data-toggle="modal" data-target="#messageModal"><i class="fas fa-reply mr-1"></i> Reply</button>
       <button class="btn btn-info m-3" onClick="saveMessage()"><i class="fas fa-bookmark mr-1"></i> Save Message</button>
       <button class="btn btn-danger m-3" onClick="deleteMessage()"><i class="fas fa-trash-alt mr-1"></i> Delete</button>
@@ -113,13 +114,12 @@
       to: to
     })
     .then(function (response) {
-      console.log(response);
-      document.getElementById("message").value = "";
-
       socket.emit("message", {
         from: user,
         to: to
       });
+
+      window.location = "/messages";
     })
     .catch(function (error) {
       console.log(error);
