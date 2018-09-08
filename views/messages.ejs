@@ -181,13 +181,12 @@
       to: to
     })
     .then(function (response) {
-      console.log(response);
-      document.getElementById("message").value = "";
-
       socket.emit("message", {
         from: user,
         to: to
       });
+
+      window.location = "/messages";
     })
     .catch(function (error) {
       console.log(error);
