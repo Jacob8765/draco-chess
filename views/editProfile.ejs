@@ -69,7 +69,7 @@
 
       <div class="btn btn-dark btn-lg upload">
         <span><i class="fas fa-upload mr-1"> </i>Upload</span>
-        <input type="file" name="profilePic" id="profileUpload" accept="image/x-png, image/jpeg">
+        <input type="file" name="profilePic" id="profileUpload" accept="image/x-png, image/jpeg" onChange="form.submit()">
       </div>
       <p class="text-small m-1">Max upload size: <%= config.profilePicMaxSize %>mb</p>
 
@@ -94,7 +94,7 @@
       <% if (!user.club.status) { %>
         <button type="button" class="btn btn-secondary"  data-toggle="modal" data-target="#joinClub"><i class="fas fa-chess mr-1"></i> Join/Create Club</button>
       <% } else if (user.club.status == "pending") { %>
-        <button type="button" onClick="leaveClub()" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Revoke Membership</button>
+        <button type="button" onClick="leaveClub()" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Cancel Membership Request</button>
       <% } else if (user.club.status == "owner") { %>
         <a href="/manageClub" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Manage Club</a>
       <% } else { %>

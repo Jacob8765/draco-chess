@@ -71,9 +71,9 @@
 
       <p>Member since <%= profile.dateJoined %><br>
         <% if (profile.club.status == "owner") { %>
-          Owner of <a href="/clubs/<%= profile.club.link %>"><%= profile.club.name %></a>
+          Club owner of <a href="/clubs/<%= profile.club.link %>"><%= profile.club.name %></a>
         <% } else if (profile.club.status == "member") { %>
-          Member of <a href="/clubs/<%= profile.club.link %>"><%= profile.club.name %></a>
+          Club member of <a href="/clubs/<%= profile.club.link %>"><%= profile.club.name %></a>
         <% } %>
       </p>
     </div>

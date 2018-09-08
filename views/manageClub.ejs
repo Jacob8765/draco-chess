@@ -74,7 +74,7 @@
         <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
           <div class="mx-auto my-3 text-center">
             <h3 class="font-weight-light text-center m-2">Total number of visits: <%= club.hits %>
-            <div class="d-flex justify-content-center">
+            <div class="d-flex justify-content-center mt-2">
               <button class="btn btn-danger" onClick="deleteClub()"><i class="fas fa-trash-alt mr-1"></i> Delete Club</button>
             </div>
           </div>
@@ -243,11 +243,8 @@
           },
         })
         .then(name => {
-          if (!name) {
-            throw null;
-          } else if (name == <%- JSON.stringify(club.name) %>) {
-
-            axios.post('/api/deleteClub')
+          if (name == <%- JSON.stringify(club.name) %>) {
+            axios.post('/api/leaveClub')
               .then(function (response) {
                 swal("Success", "Your club has been successfully deleted", "success")
                   .then((value) => {
@@ -257,15 +254,11 @@
               .catch(function (error) {
                 swal("Error", "Something went wrong while deleting your account", "error");
                 console.log(error);
-              });
-          } else {
-            swal("Your club has not been deleted");
+            });
           }
         });
-      } else {
-        swal("Your club has not been deleted");
       }
-    }); 
+    });
   }
 
   removeMember = (name) => {
@@ -273,10 +266,7 @@
       name: name
     })
     .then(function (response) {
-      swal("Success", name + "'s account has been successfully removed", "success")
-        .then((value) => {
-          window.location = window.location;
-        });
+      window.location = window.location;
     })
     .catch(function (error) {
       swal("Error", "Something went wrong while removing " + name + "'s account", "error");
@@ -289,10 +279,7 @@
       name: name
     })
     .then(function (response) {
-      swal("Success", name + "'s account has been successfully accepted", "success")
-        .then((value) => {
-          window.location = window.location;
-        });
+      window.location = window.location;
     })
     .catch(function (error) {
       swal("Error", "Something went wrong while accepting " + name + "'s account", "error");

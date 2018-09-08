@@ -211,10 +211,6 @@
                     </div>
                     <div class="modal-body">
                       <div class="form-group">
-                        <label for="username<%= account.name %>">Username</label>
-                        <input type="text" class="form-control" id="username<%= account.name %>" value="<%= account.name %>">
-                      </div>
-                      <div class="form-group">
                         <label for="realName<%= account.name %>">Real name</label>
                         <input type="text" class="form-control" id="realName<%= account.name %>" value="<%= account.profile.realName %>">
                       </div>
@@ -385,21 +381,18 @@
     let realName = document.getElementById("realName" + name).value;
     let location = document.getElementById("location" + name).value;
     let aboutMe = document.getElementById("aboutMe" + name).value;
-    let username = document.getElementById("username" + name).value;
 
     axios.post('/api/updateProfile', {
       name: name,
       id: id,
       realName: realName,
       location: location,
-      aboutMe: aboutMe,
-      username: username
+      aboutMe: aboutMe
     })
     .then(function (response) {
       document.getElementById("realName" + name).value = "";
       document.getElementById("location" + name).value = "";
       document.getElementById("aboutMe" + name).value = "";
-      document.getElementById("username" + name).value = "";
 
       swal("Success", "Successfully updated " + name + "'s profile", "success")
         .then((value) => {

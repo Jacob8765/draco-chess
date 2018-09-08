@@ -139,52 +139,46 @@ module.exports = (app, db, bcrypt, passport) => {
     } else {
       if (req.user.isAdmin) {
         db.get("members.members").find({ name: req.body.name, id: Number(req.body.id) }).get("profile").assign({ realName: req.body.realName, location: req.body.location, aboutMe: req.body.aboutMe }).write();
-        db.get("members.members").find({ name: req.body.name, id: Number(req.body.id) }).assign({ name: req.body.username }).write();
         res.redirect("/admin");
       } else {
-        try {
-          var form = new formidable.IncomingForm();
-          var oldpath;
-          var newpath;
-          var currentProfile = db.get("members.members").find({ name: req.user.name }).get("profile.picture").value();
-          var extention = currentProfile.substring(currentProfile.length - 4);
+        var form = new formidable.IncomingForm();
+        var oldpath;
+        var newpath;
+        var currentProfile = db.get("members.members").find({ id: req.user.id }).get("profile.picture").value();
+        var extention;
 
-          form.parse(req, function (err, fields, files) {
-            db.get("members.members").find({ name: req.user.name }).get("profile").assign({ aboutMe: fields.aboutMe, realName: fields.realName, location: fields.location }).write();
+        form.parse(req, function (err, fields, files) {
+          db.get("members.members").find({ name: req.user.name }).get("profile").assign({ aboutMe: fields.aboutMe, realName: fields.realName, location: fields.location }).write();
+          extention = files.profilePic.name.substring(files.profilePic.name.length - 4);
 
-            if (files.profilePic.name) {
-              if (fs.statSync(files.profilePic.path).size / 1000000 < db.get("config.profilePicMaxSize").value()) {
-                if (extention && ".jpg" || extention == ".png" || extention && ".gif") {
+          if (files.profilePic.name) {
+            if (fs.statSync(files.profilePic.path).size / 1000000 < db.get("config.profilePicMaxSize").value()) {
+              if (extention && ".jpg" || extention == ".png" || extention == ".gif") {
+                newpath = __dirname.replace("routes", "public/profile/") + req.user.name + extention;
+                oldpath = files.profilePic.path;
 
-                  if (currentProfile == "/profile/" + req.user.name + extention) {
-                    fs.unlink(__dirname.replace("routes", "public/profile/") + req.user.name + extention, (err) => {
-                      if (err) console.log(err);
-                    });
-                  }
-
-                  let profilePath = "/profile/" + req.user.name + files.profilePic.name.substring(files.profilePic.name.length - 4);
-                  db.get("members.members").find({ name: req.user.name }).get("profile").assign({ picture: profilePath }).write();
-
-                  newpath = __dirname.replace("routes", "public/profile/") + req.user.name + files.profilePic.name.substring(files.profilePic.name.length - 4);
-                  oldpath = files.profilePic.path;
-
-                  fs.copyFile(oldpath, newpath, (err) => {
+                if (fs.existsSync(__dirname.replace("routes", "public") + newpath)) {
+                  console.log("File exists");
+                  fs.unlink(__dirname.replace("routes", "public") + newpath, (err) => {
                     if (err) console.log(err);
                   });
                 }
 
-                fs.unlink(files.profilePic.path, (err) => {
+                db.get("members.members").find({ id: req.user.id }).get("profile").assign({ picture: "/profile/" + req.user.name + extention }).write();
+
+                fs.copyFile(oldpath, newpath, (err) => {
                   if (err) console.log(err);
                 });
               }
-            }
-          });
 
-          res.redirect("/profile/" + req.user.name);
-        } catch (err) {
-          console.log(err);
-          res.redirect("/profile/" + req.user.name);
-        }
+              fs.unlink(oldpath, (err) => {
+                if (err) console.log(err);
+              });
+            }
+          }
+        });
+
+        res.redirect("/profile/" + req.user.name);
       }
     }
   });
@@ -244,7 +238,11 @@ module.exports = (app, db, bcrypt, passport) => {
           location: "",
         },
         pending: db.get("config.requireApproval").value(),
-        id: db.get("members.members").size().value() + 1
+        id: db.get("members.members").size().value() + 1,
+        club: {
+          status: null,
+          name: null
+        }
       }
     ).write();
 
@@ -267,10 +265,28 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/deactivateMember", (req, res) => {
     if (req.user) {
       if (req.user.isAdmin) {
-        db.get("members.members").find({ id: Number(req.body.id) }).assign({deactivated: true}).write();
+        if (db.get("members.members").find({ id: Number(req.body.id) }).get("club.status").value() == "owner") {
+          db.get("clubs").remove({ owner: Number(req.body.id) }).write();
+          db.get("members.members").value().map((member) => {
+            if (member.club.name == db.get("members.members").find({ id: Number(req.body.id) }).get("club.name").value()) {
+              db.get("members.members").find({ id: member.id }).get("club").assign({ status: null, name: null }).write();
+            }
+          })
+        }
+
+        db.get("members.members").find({ id: Number(req.body.id) }).assign({ deactivated: true, club: { status: null, name: null } }).write();
         res.sendStatus(200);
       } else {
-        db.get("members.members").find({ id: req.user.id }).assign({deactivated: true}).write();
+        if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner") {
+          db.get("clubs").remove({ owner: req.user.id }).write();
+          db.get("members.members").value().map((member) => {
+            if (member.club.name == db.get("members.members").find({ id: req.user.id }).get("club.name").value()) {
+              db.get("members.members").find({ id: member.id }).get("club").assign({ status: null, name: null }).write();
+            }
+          })
+        }
+
+        db.get("members.members").find({ id: req.user.id }).assign({ deactivated: true, club: { status: null, name: null } }).write();
         res.sendStatus(200);
       }
     } else {
@@ -317,10 +333,10 @@ module.exports = (app, db, bcrypt, passport) => {
     if (req.user) {
       if (req.user.isAdmin) {
         db.get("config").assign({ siteName: req.body.siteName, profilePicMaxSize: req.body.upload, requireApproval: (req.body.requireApproval ? true : false) }).write();
-        db.get("config").assign({gameTimes: []}).write();
+        db.get("config").assign({ gameTimes: [] }).write();
 
         for (let i = 0; i < 3; i++) {
-          db.get("config.gameTimes").push({text: req.body["text" + i], milliseconds: req.body["milliseconds" + i]}).write();
+          db.get("config.gameTimes").push({ text: req.body["text" + i], milliseconds: req.body["milliseconds" + i] }).write();
         }
 
         res.redirect("/admin");
@@ -336,7 +352,7 @@ module.exports = (app, db, bcrypt, passport) => {
     if (req.user) {
       db.get("clubs").push({
         name: req.body.name,
-        link: req.body.name.replace(" ", "-").replace("'", "").replace('"', "").toLowerCase(),
+        link: req.body.name.replace(/ /g, "-").replace(/'/g, "").replace(/"/g, "").toLowerCase(),
         owner: req.user.id,
         dateCreated: Date.now(),
         text: "",
@@ -354,8 +370,10 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/joinClub", (req, res) => {
     if (req.user) {
       if (db.get("clubs").find({ name: req.body.clubName }).value()) {
-        db.get("clubs").find({ name: req.body.clubName }).get("members").push({ name: req.user.name, pending: true }).write();
-        db.get("members.members").find({ name: req.user.name }).get("club").assign({ status: "pending", name: req.body.clubName, link: db.get("clubs").find({ name: req.body.clubName }).get("link").value() }).write();
+        if (!db.get("members.members").find({ id: req.user.id }).get("club.status").value()) {
+          db.get("clubs").find({ name: req.body.clubName }).get("members").push({ name: req.user.name, pending: true }).write();
+          db.get("members.members").find({ id: req.user.id }).get("club").assign({ status: "pending", name: req.body.clubName, link: db.get("clubs").find({ name: req.body.clubName }).get("link").value() }).write();
+        }
         res.sendStatus(200);
       } else {
         res.sendStatus(401);
@@ -395,28 +413,18 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/leaveClub", (req, res) => {
     if (req.user) {
       if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "member") {
-        db.get("clubs").find({ name: db.get("members.members").find({ name: req.user.name }).get("club.name").value() }).get("members").remove({ name: req.user.name }).write();
-        db.get("members.members").find({ name: req.user.name }).get("club").assign({ status: null, name: null }).write();
+        db.get("clubs").find({ name: db.get("members.members").find({ id: req.user.id }).get("club.name").value() }).get("members").remove({ name: req.user.name }).write();
+        db.get("members.members").find({ id: req.user.id }).get("club").assign({ status: null, name: null, link: "" }).write();
         res.sendStatus(200);
       } else if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner") {
-        db.get("clubs").find({ owner: req.user.id }).get("members").remove({ name: req.body.name }).write();
-        db.get("members.members").find({ name: req.body.name }).get("club").assign({ status: null, name: null }).write();
-        res.sendStatus(200);
-      } else {
-        res.sendStatus(401);
-      }
-    } else {
-      res.sendStatus(401);
-    }
-  });
-
-  app.post("/api/deleteClub", (req, res) => {
-    if (req.user) {
-      console.log(db.get("members.members").find({ id: req.user.id }).get("club.status").value());
-      if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner") {
         db.get("clubs").remove({ owner: req.user.id }).write();
-        db.get("members.members").find({ id: req.user.id }).get("club").assign({ status: null, name: null }).write();
-        res.redirect("/manageClub");
+        db.get("members.members").value().map((member) => {
+          if (member.club.name == db.get("members.members").find({ id: req.user.id }).get("club.name").value() && member.id !== req.user.id) {
+            db.get("members.members").find({ id: member.id }).get("club").assign({ status: null, name: null, link: "" }).write();
+          }
+        })
+        db.get("members.members").find({ id: req.user.id }).get("club").assign({ status: null, name: null, link: "" }).write();
+        res.sendStatus(200);
       } else {
         res.sendStatus(401);
       }
