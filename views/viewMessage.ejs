@@ -16,6 +16,7 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/js/mdb.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="/scripts.js"></script>
 </head>
 
 <body>
@@ -151,18 +152,7 @@
   }
 
   socket.on("message", (data) => {
-    console.log(data);
-    if (data.to == user) {
-      if (document.getElementById("messages").getAttribute("class").split(" ").indexOf("d-none") !== -1) {
-        $("#messages").removeClass("d-none");
-      }
-
-      if (document.title[0] !== "(") {
-        document.title = "(0) " + document.title;
-      }
-      document.getElementById("messages").innerHTML = Number(document.getElementById("messages").innerHTML) + 1;
-      document.title = document.title.replace(document.title[1], Number(document.title[1]) + 1);      
-    }
+    handleMessage(data, user);
   });
 </script>
 

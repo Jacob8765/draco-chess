@@ -17,6 +17,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="/scripts.js"></script>
 </head>
 
 <body>
@@ -153,7 +154,7 @@
         </div>
         <div class="modal-body">
           <h6 class="m-3 text-center"><b>Join Club</b></h6>
-          <p class="m-2">Select a club from the list below. Then wait for a club administrator to accept you.</p>
+          <p class="m-2">Select a club from the list below, then wait for the club owner to accept you.</p>
           <select class="custom-select" id="selectClub">
             <% clubs.map((club) => { %>
               <option><%= club.name %></option>
@@ -180,20 +181,10 @@
 
 <script>
   var socket = io.connect(window.location.host);
+  var user = <%- JSON.stringify(user) %>;
 
   socket.on("message", (data) => {
-    console.log(data);
-    if (data.to == user) {
-      if (document.getElementById("messages").getAttribute("class").split(" ").indexOf("d-none") !== -1) {
-        $("#messages").removeClass("d-none");
-      }
-
-      if (document.title[0] !== "(") {
-        document.title = "(0) " + document.title;
-      }
-      document.getElementById("messages").innerHTML = Number(document.getElementById("messages").innerHTML) + 1;
-      document.title = document.title.replace(document.title[1], Number(document.title[1]) + 1);      
-    }
+    handleMessage(data, user.name);
   });
 
   validateForm = () => {
@@ -298,7 +289,6 @@
         name: name
       })
       .then(function (response) {
-        console.log(response);
         window.location = "/manageClub";
       })
       .catch(function (error) {

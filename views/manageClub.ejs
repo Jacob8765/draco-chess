@@ -18,6 +18,7 @@
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="/scripts.js"></script>
 </head>
 
 <body>
@@ -198,18 +199,7 @@
   var socket = io.connect(window.location.host);
 
   socket.on("message", (data) => {
-    console.log(data);
-    if (data.to == user) {
-      if (document.getElementById("messages").getAttribute("class").split(" ").indexOf("d-none") !== -1) {
-        $("#messages").removeClass("d-none");
-      }
-
-      if (document.title[0] !== "(") {
-        document.title = "(0) " + document.title;
-      }
-      document.getElementById("messages").innerHTML = Number(document.getElementById("messages").innerHTML) + 1;
-      document.title = document.title.replace(document.title[1], Number(document.title[1]) + 1);      
-    }
+    handleMessage(data, user.name);
   });
 
   document.getElementById("preview").innerHTML = marked(<%- JSON.stringify(club.text) %>);

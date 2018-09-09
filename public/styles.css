@@ -75,7 +75,7 @@ body {
 }
 
 @media only screen and (max-width: 600px) {
-  form {
+  .login-form {
     max-width: 90%;
     min-width: 90%;
   }

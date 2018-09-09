@@ -91,7 +91,7 @@ module.exports = (app, db, bcrypt, passport) => {
       let id = db.get("members.members").find({ name: req.body.to }).get("messages.messages").size().value() + 1;
 
       db.get("members.members").find({ name: req.body.to }).get("notifications.messages").push({ id: id }).write();
-      db.get("members.members").find({ name: req.body.to }).get("messages.messages").push({ from: req.user.name, date: "7/22/18", message: req.body.message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'), id: id }).write();
+      db.get("members.members").find({ name: req.body.to }).get("messages.messages").push({ from: req.user.name, date: Date.now(), message: req.body.message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'), id: id }).write();
 
       res.sendStatus(200);
     } else {
