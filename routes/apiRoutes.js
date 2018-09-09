@@ -8,8 +8,9 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/gameMove", (req, res) => {
     if (req.user) {
-      if (db.get("games").find({ gameId: Number(req.body.gameId) }).get("w").value() == req.user.name || db.get("games").find({ gameId: Number(req.body.gameId) }).get("b").value() == req.user.name) {
-        // validate move?
+      let game = db.get("games").find({ gameId: Number(req.body.gameId) }).value()
+
+      if (game[game.currentTurn] == req.user.name) {
         db.get('games').find({ gameId: Number(req.body.gameId) }).assign({ fen: req.body.fen, currentTurn: req.body.currentTurn }).write();
         res.sendStatus(200);
       } else {
@@ -23,11 +24,11 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/gameChallenge", (req, res) => {
     if (req.user) {
       if (req.body.opponent !== req.user.name) {
-        let id = db.get("games").size().value() + 1;
+        let dateCreated = Date.now();
 
         db.get("games").push({
-          gameId: id,
-          dateCreated: "7/10/18",
+          gameId: null,
+          dateCreated: dateCreated,
           fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
           w: req.user.name,
           b: req.body.opponent,
@@ -40,12 +41,12 @@ module.exports = (app, db, bcrypt, passport) => {
           isChallenge: true,
           challenger: req.user.name,
           dateFinished: null,
-          dateEnds: Date.now() + req.body.time,
+          dateEnds: dateCreated + req.body.time,
           drawRequested: false,
           drawRequestedBy: null
         }).write();
 
-        res.json({ status: 200, id: id })
+        res.json({ status: 200, dateCreated: dateCreated })
       } else {
         res.sendStatus(401);
       }
@@ -56,16 +57,8 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/acceptChallenge", (req, res) => {
     if (req.user) {
-      if (db.get("games").find({ gameId: Number(req.body.id) }).get("w").value() == req.user.name || db.get("games").find({ gameId: Number(req.body.id) }).get("b").value() == req.user.name) {
-        if (db.get("games").find({ gameId: Number(req.body.id) }).get("challenger").value() !== req.user.name) {
-          db.get("games").find({ gameId: Number(req.body.id) }).assign({ isChallenge: false }).write();
-          res.sendStatus(200);
-        } else {
-          res.sendStatus(401);
-        }
-      } else {
-        res.sendStatus(401);
-      }
+      db.get("games").find({ dateCreated: Number(req.body.dateCreated), isChallenge: true }).assign({ gameId: db.get("games").filter({ isChallenge: false }).size().value() + 1, dateCreated: Date.now(), isChallenge: false }).write();
+      res.sendStatus(200);
     } else {
       res.sendStatus(401);
     }
@@ -73,12 +66,8 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/declineChallenge", (req, res) => {
     if (req.user) {
-      if (db.get("games").find({ gameId: Number(req.body.id) }).get("w").value() == req.user.name || db.get("games").find({ gameId: Number(req.body.id) }).get("b").value() == req.user.name) {
-        db.get("games").remove({ gameId: Number(req.body.id) }).write();
-        res.sendStatus(200);
-      } else {
-        res.sendStatus(401);
-      }
+      db.get("games").remove({dateCreated: Number(req.body.dateCreated)}).write();
+      res.sendStatus(200)
     } else {
       res.sendStatus(401);
     }

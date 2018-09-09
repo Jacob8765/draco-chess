@@ -47,3 +47,36 @@ body {
   cursor: pointer;
   opacity: 0;
 }
+
+.login-form {
+  max-width: 30%;
+  min-width: 500px;
+}
+
+.tile {
+  min-width: 130px;
+  min-height: 105px;
+  max-width: 130px;
+  max-height: 105px;
+}
+
+.big-card {
+  background-color: #eeeeee;
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.container-text {
+  background-color: #bdbdbd;
+}
+
+#doughnutChart {
+  max-width: 600px;
+}
+
+@media only screen and (max-width: 600px) {
+  form {
+    max-width: 90%;
+    min-width: 90%;
+  }
+}

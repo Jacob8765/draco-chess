@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/css/mdb.min.css" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
   
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
@@ -60,7 +61,7 @@
   </nav>
 
   <div class="text-center">
-    <div class="mx-auto my-3 hoverable profile-img"></div>
+    <div class="mx-auto my-3 hoverable profile-img" style="width: 200px; height: 200px; border-radius: 100px; background-image: url('<%= profile.profile.picture %>')"></div>
 
     <div class="m-2">
       <h2 class="m-1"><%= profile.name %> 
@@ -101,22 +102,6 @@
       </div>
     <% } %>
   </div>
-
-  <style>
-    .profile-img {
-      width: 200px;
-      height: 200px;
-      border-radius: 100px;
-
-      background-image: url("<%= profile.profile.picture %>");
-      background-size: cover;
-      background-position: center center;
-    }
-
-    #doughnutChart {
-      max-width: 600px;
-    }
-  </style>
 </body>
 
 <script>

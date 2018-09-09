@@ -1,14 +1,6 @@
 module.exports = (app, db) => {
   app.get("/login", (req, res) => {
-    let onlineUsers = 0
-
-    db.get("members.members").value().map((member) => {
-      if (member.isOnline) {
-        onlineUsers++;
-      }
-    });
-
-    res.render("login", { config: db.get("config").value(), online: onlineUsers, games: db.get("games").filter({ isChallenge: false }).size().value(), members: db.get("members.members").filter({ pending: false, deactivated: false }).size().value() });
+    res.render("login", { config: db.get("config").value(), online: db.get("members.members").filter({ isOnline: true }).size().value(), games: db.get("games").filter({ isChallenge: false }).size().value(), members: db.get("members.members").filter({ pending: false, deactivated: false }).size().value() });
   });
 
   app.get("/", (req, res) => {
@@ -21,7 +13,7 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      res.render("home", { user: db.get("members.members").find({ id: req.user.id }).value(), games: [...db.get("games").filter({ w: req.user.name }).value().concat(db.get("games").filter({ b: req.user.name }).value())], players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), onlineUsers: db.get("members.members").filter({ isOnline: true }).map("name").value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
+      res.render("home", { user: db.get("members.members").find({ id: req.user.id }).value(), games: db.get("games").filter({ w: req.user.name }).value().concat(db.get("games").filter({ b: req.user.name }).value()), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), onlineUsers: db.get("members.members").filter({ isOnline: true }).map("name").value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
     }
   });
 
@@ -78,7 +70,7 @@ module.exports = (app, db) => {
 
       let profileUser = db.get("members.members").find({ name: req.params.name }).value();
 
-      if (profileUser) {
+      if (profileUser && !profileUser.deactivated && !profileUser.pending) {
         res.render("profile", { games: db.get("games").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), profile: profileUser, config: db.get("config").value() });
       } else {
         res.redirect("/");
@@ -157,7 +149,7 @@ module.exports = (app, db) => {
   app.get("/accountPending", (req, res) => {
     if (req.user) {
       if (req.user.pending) {
-        res.send("<h2 class='m-3 text-center'>Your account is still pending approval. You will be able to use your account as soon as an administrator approves it</h2>");
+        res.send("<h2 style='margin: 10px; text-center'>Your account is still pending approval. You will be able to use your account as soon as an administrator approves it</h2>");
       } else {
         res.redirect("/");
       }
@@ -212,15 +204,7 @@ module.exports = (app, db) => {
           db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
         }
 
-        let club;
-
-        if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner") {
-          club = db.get("clubs").find({ owner: req.user.id }).value();
-        } else {
-          club = db.get("clubs").find({ name: db.get("members.members").find({ id: req.user.id }).get("club.name").value() }).value();
-        }
-
-        res.render("manageClub", { club: club, messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
+        res.render("manageClub", { club: db.get("clubs").find({ owner: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
       } else {
         res.redirect("/")
       }
