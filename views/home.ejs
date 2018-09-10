@@ -74,18 +74,13 @@
     </div>
   <% } %>
   
-  <% var gamesNum = 0 %>
-  <% var allGamesNum = 0 %>
-  <% games.map((game) => {if (!game.isOver && !game.isChallenge) gamesNum++}) %>
-  <% games.map((game) => {if (!game.isOver) allGamesNum++}) %>
-  
   <div id="games" class="text-center">
     <div class="w-75 m-auto big-card">
-      <p class="p-2 m-0 text-left container-text">MY GAMES: <b><%= gamesNum %></b></p>
+      <p class="p-2 m-0 text-left container-text">MY GAMES: <b><%= games.filter(game => game.isChallenge == false).length %></b></p>
       <div class="d-flex justify-content-center flex-wrap p-4" id="ongoingGames">
-        <% if (allGamesNum > 0) { %>
+        <% if (games.length > 0) { %>
           <% games.map((game) => { %>
-            <% if (!game.isOver && !game.isChallenge) { %>
+            <% if (!game.isChallenge) { %>
               <div id="<%= game.gameId %>" class="m-3 tile z-depth-1-half text-dark p-2 <%= game[game.currentTurn] == user.name ? 'bg-success' : 'bg-danger' %>">
                 <b><%- game.w == user.name ? game.b : game.w %></b>
                 <p title="<%= game.gameId %>">ID: <%= game.gameId.length > 3 ? game.gameId.substring(0, 3) + "..." : game.gameId %></p>
@@ -120,7 +115,7 @@
             <p class="<%= onlineUsers.length > 1 ? 'mr-2' : ''%>"><a href="/profile/<%= user %>"><%= user %></a><%= onlineUsers.length > 1 ? "," : ""%></p>
           <% }); %>
         <% } else { %>
-          <h5 id="noGames">No users currently online</h5>
+          <h5>No users currently online</h5>
         <% } %>
       </div>
     </div>

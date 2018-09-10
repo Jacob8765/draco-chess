@@ -13,7 +13,7 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      res.render("home", { user: db.get("members.members").find({ id: req.user.id }).value(), games: db.get("games").filter({ w: req.user.name }).value().concat(db.get("games").filter({ b: req.user.name }).value()), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), onlineUsers: db.get("members.members").filter({ isOnline: true }).map("name").value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
+      res.render("home", { user: db.get("members.members").find({ id: req.user.id }).value(), games: db.get("games").filter({ w: req.user.name, isOver: false }).value().concat(db.get("games").filter({ b: req.user.name, isOver: false }).value()), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), onlineUsers: db.get("members.members").filter({ isOnline: true }).map("name").value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
     }
   });
 
