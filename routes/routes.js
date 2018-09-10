@@ -32,27 +32,25 @@ module.exports = (app, db) => {
     } else {
       if (req.user.pending) {
         res.redirect("/accountPending");
-      } else if (!req.query.id) {
-        if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
-          db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
-        }
-
-        res.render("messages", { user: db.get("members.members").find({ id: req.user.id }).value(), messages: db.get("members.members").find({ id: req.user.id }).get("messages.messages").value(), savedMessages: db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").value(), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
       } else {
         if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
           db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
         }
 
-        let message = db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.query.id) }).value();
-
-        if (message) {
-          if (db.get("members.members").find({ name: req.user.name }).get("notifications.messages").find({ id: Number(req.query.id) }).value()) {
-            db.get("members.members").find({ name: req.user.name }).get("notifications.messages").remove({ id: Number(req.query.id) }).write();
-          }
-
-          res.render("viewMessage", { message: message.message, from: message.from, id: message.id, user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() })
+        if (!req.query.id) {
+          res.render("messages", { user: db.get("members.members").find({ id: req.user.id }).value(), messages: db.get("members.members").find({ id: req.user.id }).get("messages.messages").filter({ deleted: false }).value(), savedMessages: db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").filter({deleted: false}).value(), players: db.get("members.members").map("name").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() });
         } else {
-          res.redirect("/")
+          let message = db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.query.id), deleted: false }).value();
+
+          if (message) {
+            if (db.get("members.members").find({ name: req.user.name }).get("notifications.messages").find({ id: Number(req.query.id) }).value()) {
+              db.get("members.members").find({ name: req.user.name }).get("notifications.messages").remove({ id: Number(req.query.id) }).write();
+            }
+
+            res.render("viewMessage", { message: message.message, from: message.from, id: message.id, user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), config: db.get("config").value() })
+          } else {
+            res.redirect("/")
+          }
         }
       }
     }
@@ -71,7 +69,7 @@ module.exports = (app, db) => {
       let profileUser = db.get("members.members").find({ name: req.params.name }).value();
 
       if (profileUser && !profileUser.deactivated && !profileUser.pending) {
-        res.render("profile", { games: db.get("games").value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), profile: profileUser, config: db.get("config").value() });
+        res.render("profile", { games: db.get("games").filter({ w: profileUser.name }).value().concat(db.get("games").filter({ b: profileUser.name }).value()), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), profile: profileUser, config: db.get("config").value() });
       } else {
         res.redirect("/");
       }

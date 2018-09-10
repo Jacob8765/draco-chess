@@ -61,19 +61,8 @@
     </div>
   </nav>
 
-  <% var ongoingGamesNum = 0 %>
-  <% var finishedGamesNum = 0 %>
-
-  <% games.map((game) => { %>
-    <% if (!game.isOver && !game.isChallenge) { %>
-    <% ongoingGamesNum++; %>
-    <% } else if (game.isOver && !game.isChallenge) { %>
-      <% finishedGamesNum++; %>
-    <% } %>
-  <% }) %>
-
   <% if (games.length > 0) { %>
-    <% if (ongoingGamesNum > 0) { %>
+    <% if (games.filter(game => !game.isChallenge && !game.isOver).length > 0) { %>
       <h3 class="m-5 text-center">Ongoing Games</h3>
       <table class="table table-striped w-75 m-auto p-3">
         <thead>
@@ -98,13 +87,10 @@
           <% }) %>
         </tbody>
       </table>
-      <% if (finishedGamesNum > 0) { %>
-       <hr>
-      <% } %>
     <% } %>
 
-    <% if (finishedGamesNum > 0) { %>
-      <h3 class="m-5 text-center">Past Games</h3>
+    <% if (games.filter(game => !game.isChallenge && game.isOver).length > 0) { %>
+      <h3 class="m-5 text-center">Finished Games</h3>
       <table class="table table-striped w-75 m-auto p-3">
         <thead>
           <tr>

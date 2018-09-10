@@ -91,7 +91,7 @@ module.exports = (app, db, bcrypt, passport) => {
       let id = db.get("members.members").find({ name: req.body.to }).get("messages.messages").size().value() + 1;
 
       db.get("members.members").find({ name: req.body.to }).get("notifications.messages").push({ id: id }).write();
-      db.get("members.members").find({ name: req.body.to }).get("messages.messages").push({ from: req.user.name, date: Date.now(), message: req.body.message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'), id: id }).write();
+      db.get("members.members").find({ name: req.body.to }).get("messages.messages").push({ from: req.user.name, date: Date.now(), message: req.body.message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'), id: id, deleted: false }).write();
 
       res.sendStatus(200);
     } else {
@@ -102,7 +102,7 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/deleteMessage", (req, res) => {
     if (req.user) {
       if (db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.body.id) }).value()) {
-        db.get("members.members").find({ name: req.user.name }).get("messages.messages").remove({ id: Number(req.body.id) }).write();
+        db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.body.id) }).assign({deleted: true}).write();
         res.sendStatus(200);
       } else {
         res.sendStatus(401);
@@ -114,8 +114,21 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/saveMessage", (req, res) => {
     if (req.user) {
-      db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").push(db.get("members.members").find({ id: req.user.id }).get("messages.messages").find({ id: Number(req.body.id) }).value()).write();
-      db.get("members.members").find({ id: req.user.id }).get("messages.messages").remove({ id: Number(req.body.id) }).write();
+      let message = db.get("members.members").find({ id: req.user.id }).get("messages.messages").find({ id: Number(req.body.id) }).value();
+
+      message.id = db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").size().value() + 1;
+      db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").push(message).write();
+      db.get("members.members").find({ id: req.user.id }).get("messages.messages").find({ id: Number(req.body.id) }).assign({deleted: true}).write();
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(401);
+    }
+  });
+
+  app.post("/api/deleteSavedMessage", (req, res) => {
+    if (req.user) {
+      db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").find({ id: Number(req.body.id) }).assign({deleted: true}).write();
+
       res.sendStatus(200);
     } else {
       res.sendStatus(401);

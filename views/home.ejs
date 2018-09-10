@@ -76,7 +76,7 @@
   
   <div id="games" class="text-center">
     <div class="w-75 m-auto big-card">
-      <p class="p-2 m-0 text-left container-text">MY GAMES: <b><%= games.filter(game => game.isChallenge == false).length %></b></p>
+      <p class="p-2 m-0 text-left container-text">MY GAMES: <b><%= games.filter(game => !game.isChallenge).length %></b></p>
       <div class="d-flex justify-content-center flex-wrap p-4" id="ongoingGames">
         <% if (games.length > 0) { %>
           <% games.map((game) => { %>
