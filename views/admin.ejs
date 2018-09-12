@@ -43,6 +43,9 @@
           <a class="nav-link" href="/games">Games</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="/members">Members</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="/clubs">Chess Clubs</a>
         </li>
         <li class="nav-item">
@@ -91,6 +94,11 @@
                 <label class="custom-control-label" for="requireApproval">Require approval for new members</label>
               </div>
 
+              <div class="custom-control custom-checkbox my-2">
+                <input type="checkbox" class="custom-control-input" id="chessClubs" name="chessClubs">
+                <label class="custom-control-label" for="chessClubs">Allow chess clubs</label>
+              </div>
+
               <p class="mt-4 mb-2 font-weight-light">Game times</p>
               <% config.gameTimes.map((option, index) => { %>
                 <div class="form-row my-1">
@@ -136,7 +144,7 @@
                     <td><%= account.lastName %></td>
                     <td><%= account.email %></td>
                     <td><%= new Date(account.dateJoined).toLocaleDateString("en-US") %></td>
-                    <td><a href="javascript:;" class="text-success mr-3" onClick="acceptMember('<%= account.name %>', '<%= account.id %>')" title="Accept Member"><i class="fas fa-check-circle fa-lg"></i></a> <a href="javascript:;" class="text-danger" onClick="deactivateMember('<%= account.name %>', '<%= account.id %>')" title="Decline Account"><i class="fas fa-times-circle fa-lg"></i></a></td>
+                    <td><a href="javascript:;" class="text-success mr-3" onClick="acceptMember('<%= account.name %>')" title="Accept Member"><i class="fas fa-check-circle fa-lg"></i></a> <a href="javascript:;" class="text-danger" onClick="deactivateMember('<%= account.name %>', null)" title="Decline Member"><i class="fas fa-times-circle fa-lg"></i></a></td>
                   </tr>
                 <%})%>
                 </tbody>
@@ -166,7 +174,7 @@
                     <td><%= account.lastName %></td>
                     <td><%= account.email %></td>
                     <td><%= new Date(account.dateJoined).toLocaleDateString("en-US") %></td>
-                    <td><a href="javascript:;" class="text-danger mr-2" onClick="deactivateMember('<%= account.name %>', '<%= account.id %>')" title="Delete Member"><i class="fas fa-times-circle fa-lg"></i></a> <a href="javascript:;" class="text-primary mr-2" data-toggle="modal" data-target="#changePassword<%= account.name %>" title="Change Password"><i class="fas fa-key fa-lg"></i></a> <a href="javascript:;" class="brown-text" data-toggle="modal" data-target="#editProfile<%= account.name %>" title="Edit Profile"><i class="fas fa-user-edit fa-lg"></i></a> </td>
+                    <td><a href="javascript:;" class="text-danger mr-2" onClick="deactivateMember('<%= account.name %>', '<%= account.id %>')" title="Delete Account"><i class="fas fa-times-circle fa-lg"></i></a> <a href="javascript:;" class="text-primary mr-2" data-toggle="modal" data-target="#changePassword<%= account.name %>" title="Change Password"><i class="fas fa-key fa-lg"></i></a> <a href="javascript:;" class="brown-text" data-toggle="modal" data-target="#editProfile<%= account.name %>" title="Edit Profile"><i class="fas fa-user-edit fa-lg"></i></a> </td>
                   </tr>
                 <%})%>
                 </tbody>
@@ -295,18 +303,16 @@
   const config = <%- JSON.stringify(config) %>
   var socket = io.connect(window.location.host);
 
-  if (config.requireApproval) {
-    document.getElementById("requireApproval").checked = true;
-  }
+  document.getElementById("requireApproval").checked = config.requireApproval;
+  document.getElementById("chessClubs").checked = config.chessClubs;
 
   socket.on("message", (data) => {
     handleMessage(data, user.name);
   });
 
-  acceptMember = (name, id) => {
+  acceptMember = (name) => {
     axios.post('/api/acceptMember', {
-      name: name,
-      id: id
+      name: name
     })
     .then(function (response) {
       window.location = window.location;
@@ -317,8 +323,6 @@
   }
 
   deactivateMember = (name, id) => {
-    console.log(name, id);
-
     swal({
       title: "Are you sure?",
       text: name + "'s account will be permanently deleted. This action can not be undone!",
@@ -331,9 +335,9 @@
         axios.post('/api/deactivateMember', {
           name: name,
           id: id
-        })
+        }).then((response) => {
           window.location = window.location
-        .catch(function (error) {
+        }).catch(function (error) {
           swal("Error", "Something went wrong while deleting " + name + "'s account", "error");
           console.log(error);
         });   

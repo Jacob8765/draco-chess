@@ -43,6 +43,9 @@
           <a class="nav-link" href="/games">Games</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="/members">Members</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="/clubs">Chess Clubs</a>
         </li>
         <li class="nav-item">
@@ -92,14 +95,16 @@
 
     <div class="d-flex justify-content-center mx-auto my-3 flex-wrap">
       <button type="button" class="btn btn-deep-orange" data-toggle="modal" data-target="#changePassword"><i class="fas fa-user-lock mr-1"></i> Change Password</button>
-      <% if (!user.club.status) { %>
-        <button type="button" class="btn btn-secondary"  data-toggle="modal" data-target="#joinClub"><i class="fas fa-chess mr-1"></i> Join/Create Club</button>
-      <% } else if (user.club.status == "pending") { %>
-        <button type="button" onClick="leaveClub()" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Cancel Membership Request</button>
-      <% } else if (user.club.status == "owner") { %>
-        <a href="/manageClub" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Manage Club</a>
-      <% } else { %>
-        <button class="btn btn-secondary" onClick="leaveClub()"><i class="fas fa-chess mr-1"></i> Leave Club</button>
+      <% if (config.chessClubs) { %>
+        <% if (!user.club.status) { %>
+          <button type="button" class="btn btn-secondary"  data-toggle="modal" data-target="#joinClub"><i class="fas fa-chess mr-1"></i> Join/Create Club</button>
+        <% } else if (user.club.status == "pending") { %>
+          <button type="button" onClick="leaveClub()" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Cancel Membership Request</button>
+        <% } else if (user.club.status == "owner") { %>
+          <a href="/manageClub" class="btn btn-secondary"><i class="fas fa-chess mr-1"></i> Manage Club</a>
+        <% } else { %>
+          <button class="btn btn-secondary" onClick="leaveClub()"><i class="fas fa-chess mr-1"></i> Leave Club</button>
+        <% } %>
       <% } %>
 
       <button type="button" class="btn btn-danger" onClick="deactivateAccount()"><i class="fas fa-trash-alt mr-1"></i> Delete Account</button>
@@ -277,7 +282,7 @@
 
   createClub = () => {
     swal({
-      text: 'Enter the name of your club.',
+      text: 'Enter the name of your club. A club name can only contain letters and numbers.',
       content: "input",
       button: {
         text: "Create Club",
@@ -289,7 +294,11 @@
         name: name
       })
       .then(function (response) {
-        window.location = "/manageClub";
+        if (response.data.error) {
+          swal("Error", response.data.error, "error");
+        } else {
+          window.location = "/manageClub";
+        }
       })
       .catch(function (error) {
         console.log(error);

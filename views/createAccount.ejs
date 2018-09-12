@@ -16,6 +16,7 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/js/mdb.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
@@ -36,11 +37,11 @@
     </div>
   </nav>
 
-  <form class="m-auto login-form" action="/api/createAccount" onsubmit="validateForm()" method="post">
-    <p class="h4 text-center mb-4">Create an account</p>
+  <h3 class="font-weight-light text-center mb-4">Create an Account</h3>
 
+  <div class="login-form m-auto">
     <label for="defaultFormLoginUsernameEx" class="grey-text">Username</label>
-    <input type="username" id="defaultFormLoginUsernameEx" class="form-control" name="username" required>
+    <input type="username" id="username" class="form-control" name="username" required>
 
     <br>
 
@@ -66,22 +67,41 @@
 
     <label for="confirmPassword" class="grey-text">Confirm password</label>
     <input type="password" id="confirmPassword" class="form-control" name="confirmPassword">
-
+ 
     <div class="text-center mt-4">
-      <button class="btn btn-indigo" type="submit"><i class="fas fa-user-alt mr-1"></i> Create Account</button>
+      <button class="btn btn-indigo" onClick="submitForm()"><i class="fas fa-user-alt mr-1"></i> Create Account</button>
     </div>
-  </form>
 
-  <p class="text-center m-3">Already have an account? <a href="/login">Login</a></p>
+    <p class="text-center m-3">Already have an account? <a href="/login">Login</a></p>
+  </div>
 
 </body>
 
 <script>
-  validateForm = () => {
-    if (document.getElementById("password").innerHTML !== document.getElementById("confirmPassword").innerHTML) {
-      swal("Error", "The passwords you entered do not match", "error");
-      return false;
-    }
+  submitForm = () => {
+    axios.post('/api/createAccount', {
+      username: document.getElementById("username").value,
+      email: document.getElementById("email").value,
+      firstName: document.getElementById("firstName").value,
+      lastName: document.getElementById("lastName").value,
+      password: document.getElementById("password").value,
+      confirmPassword: document.getElementById("confirmPassword").value
+    })
+      .then(function (response) {
+        console.log(response);
+        if (!response.data.error) {
+          swal("Success", "Your account has been successfully created!", "success")
+          .then((value) => {
+            window.location = "/";
+          });
+        } else {
+          swal("Error", response.data.error, "error")
+        }
+      })
+      .catch(function (error) {
+        swal("Error", "Something went wrong while creating your account. Please try again at a later time", "error");
+        console.log(error);
+    });
   }
 </script>
 

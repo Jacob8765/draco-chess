@@ -133,7 +133,7 @@ module.exports = (app, db) => {
           db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
         }
 
-        res.render("admin", { user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), pendingAccounts: db.get("members.members").filter({ pending: true }).value(), accounts: db.get("members.members").filter({ pending: false, deactivated: false }).value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
+        res.render("admin", { user: db.get("members.members").find({ id: req.user.id }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), pendingAccounts: db.get("members.members").filter({ pending: true, deactivated: false }).value(), accounts: db.get("members.members").filter({ pending: false, deactivated: false }).value(), serverMessages: db.get("serverMessages").value(), config: db.get("config").value() });
       } else {
         res.redirect("/");
       }
@@ -147,7 +147,7 @@ module.exports = (app, db) => {
   app.get("/accountPending", (req, res) => {
     if (req.user) {
       if (req.user.pending) {
-        res.send("<h2 style='margin: 10px; text-center'>Your account is still pending approval. You will be able to use your account as soon as an administrator approves it</h2>");
+        res.send("<h2 style='margin: 10px; text-align: center'>Your account is still pending approval. You will be able to use your account as soon as an administrator approves it</h2>");
       } else {
         res.redirect("/");
       }
@@ -180,11 +180,11 @@ module.exports = (app, db) => {
         db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
       }
 
-      db.get("clubs").find({ link: req.params.clubLink }).assign({ hits: db.get("clubs").find({ link: req.params.clubLink }).get("hits").value() + 1 }).write();
-      let club = db.get("clubs").find({ link: req.params.clubLink }).value();
+      db.get("clubs").find({ name: req.params.clubLink }).assign({ hits: db.get("clubs").find({ name: req.params.clubLink }).get("hits").value() + 1 }).write();
+      let club = db.get("clubs").find({ name: req.params.clubLink }).value();
 
       if (club) {
-        res.render("viewClub", { club: db.get("clubs").find({ link: req.params.clubLink }).value(), messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
+        res.render("viewClub", { club: club, messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value() });
       } else {
         res.redirect("/");
       }
@@ -206,6 +206,20 @@ module.exports = (app, db) => {
       } else {
         res.redirect("/")
       }
+    }
+  });
+
+  app.get("/members", (req, res) => {
+    if (!req.user) {
+      res.redirect("/login");
+    } else if (req.user.pending) {
+      res.redirect("/accountPending");
+    } else {
+      if (!db.get("members.members").find({ name: req.user.name }).get("isOnline").value()) {
+        db.get("members.members").find({ name: req.user.name }).assign({ isOnline: true, lastVisited: Date.now() }).write();
+      }
+
+      res.render("members", { messageNotificationsLength: db.get("members.members").find({ name: req.user.name }).get("notifications.messages").size().value(), user: db.get("members.members").find({ id: req.user.id }).value(), config: db.get("config").value(), members: db.get("members.members").value(), newestMember: db.get("members.members").sortBy("dateJoined").value()[0] });
     }
   });
 }

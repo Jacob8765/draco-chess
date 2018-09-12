@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - Games</title>
+  <title><%= messageNotificationsLength > 0 ? "(" + messageNotificationsLength + ") " : "" %> <%= config.siteName %> - Members</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
@@ -38,10 +38,10 @@
             <span id="messages" class="badge badge-light <%= messageNotificationsLength > 0 ? '' : 'd-none' %>"><%= messageNotificationsLength %></span>
           </a>
         </li>
-        <li class="nav-item active">
+        <li class="nav-item">
           <a class="nav-link" href="/games">Games</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item active">
           <a class="nav-link" href="/members">Members</a>
         </li>
         <li class="nav-item">
@@ -64,63 +64,38 @@
     </div>
   </nav>
 
-  <% if (games.length > 0) { %>
-    <% if (games.filter(game => !game.isChallenge && !game.isOver).length > 0) { %>
-      <h3 class="m-5 text-center font-weight-light">Ongoing Games</h3>
-      <table class="table table-striped w-75 m-auto p-3">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Opponent</th>
-            <th>Current Turn</th>
-            <th>Ends On</th>
-          </tr>
-        </thead>
+  <h3 class="m-5 text-center font-weight-light">Members</h3>
 
-        <tbody id="ongoingGamesTable">
-          <% games.map((game, index) => { %>
-            <% if (!game.isOver && !game.isChallenge) { %>
-            <tr onClick="window.location = '/game?id=<%= game.gameId %>'" title="Open game <%= game.gameId %>" class="cursor-pointer">
-              <th scope="row"><%= index + 1 %></th>
-              <td><%= game.challenger %></td>
-              <td><%= game[game.currentTurn] %></td>
-              <td><%= new Date(game.dateEnds).toLocaleDateString("en-US") %></td>
-            </tr>
-            <% } %>
-          <% }) %>
-        </tbody>
-      </table>
-    <% } %>
+  <div class="d-flex justify-content-around m-3 text-center animated fadeIn flex-wrap text-nowrap">
+    <div class="m-5">
+      <h4><b>Members:</b> <%= members.length %></h4>
+      <i class="fas fa-users fa-4x"></i>
+    </div>
+    <div class="m-5">
+      <h4><b>Newest member:</b> <a href="/profile/<%= newestMember.name %>"><%= newestMember.name %></a></h4>
+      <i class="fas fa-user-clock fa-4x"></i>
+    </div>
+  </div>
 
-    <% if (games.filter(game => !game.isChallenge && game.isOver).length > 0) { %>
-      <h3 class="m-5 text-center font-weight-light">Finished Games</h3>
-      <table class="table table-striped w-75 m-auto p-3">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Opponent</th>
-            <th>Winner</th>
-            <th>Date Finished</th>
-          </tr>
-        </thead>
+  <table class="table table-striped w-75 m-auto p-3">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Username</th>
+        <th>Date Joined</th>
+      </tr>
+    </thead>
 
-        <tbody id="ongoingGamesTable">
-          <% games.map((game, index) => { %>
-            <% if (game.isOver) { %>
-            <tr onClick="window.location = '/game?id=<%= game.gameId %>'" title="Open game <%= game.gameId %>" class="cursor-pointer">
-              <th scope="row"><%= index + 1 %></th>
-              <td><%= game.w == user.name ? game.b : game.w %></td>
-              <td><%= game.winner %></td>
-              <td><%= new Date(game.dateFinished).toLocaleDateString("en-US") %></td>
-            </tr>
-            <% } %>
-          <%})%>
-        </tbody>
-      </table>
-    <% } %>
-  <% } else { %>
-    <h2 class="m-3 text-center">No games to display</h2>
-  <% } %>
+    <tbody id="ongoingGamesTable">
+      <% members.map((member, index) => { %>
+        <tr onClick="window.location = '/profile/<%= member.name %>'" title="View profile" class="cursor-pointer">
+          <th scope="row"><%= index + 1 %></th>
+          <td><%= member.name %></td>
+          <td><%= new Date(member.dateJoined).toLocaleDateString("en-US") %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
 </body>
 
 <script>

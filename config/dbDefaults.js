@@ -8,7 +8,7 @@ module.exports = function (db) {
           email: "player1@example.com",
           firstName: "John",
           lastName: "Doe",
-          dateJoined: new Date(Date.now()).toLocaleDateString("en-US"),
+          dateJoined: Date.now(),
           password: "$2a$10$rleM.UPbml66e/Okd.xZFOzvnXGV29otv9W9AexN3/vrd99vlyQze",
           messages: {
             messages: [],
@@ -37,7 +37,7 @@ module.exports = function (db) {
           email: "player2@example.com",
           firstName: "Frank",
           lastName: "Smith",
-          dateJoined: new Date(Date.now()).toLocaleDateString("en-US"),
+          dateJoined: Date.now(),
           password: "$2a$10$rleM.UPbml66e/Okd.xZFOzvnXGV29otv9W9AexN3/vrd99vlyQze",
           messages: {
             messages: [],
@@ -72,6 +72,7 @@ module.exports = function (db) {
       siteName: "DracoChess",
       profilePicMaxSize: 5,
       requireApproval: true,
+      chessClubs: true,
       gameTimes: [
         {
           text: "Short (30 minutes)",

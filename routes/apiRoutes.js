@@ -66,7 +66,7 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/declineChallenge", (req, res) => {
     if (req.user) {
-      db.get("games").remove({dateCreated: Number(req.body.dateCreated)}).write();
+      db.get("games").remove({ dateCreated: Number(req.body.dateCreated) }).write();
       res.sendStatus(200)
     } else {
       res.sendStatus(401);
@@ -102,7 +102,7 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/deleteMessage", (req, res) => {
     if (req.user) {
       if (db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.body.id) }).value()) {
-        db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.body.id) }).assign({deleted: true}).write();
+        db.get("members.members").find({ name: req.user.name }).get("messages.messages").find({ id: Number(req.body.id) }).assign({ deleted: true }).write();
         res.sendStatus(200);
       } else {
         res.sendStatus(401);
@@ -118,7 +118,7 @@ module.exports = (app, db, bcrypt, passport) => {
 
       message.id = db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").size().value() + 1;
       db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").push(message).write();
-      db.get("members.members").find({ id: req.user.id }).get("messages.messages").find({ id: Number(req.body.id) }).assign({deleted: true}).write();
+      db.get("members.members").find({ id: req.user.id }).get("messages.messages").find({ id: Number(req.body.id) }).assign({ deleted: true }).write();
       res.sendStatus(200);
     } else {
       res.sendStatus(401);
@@ -127,7 +127,7 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/deleteSavedMessage", (req, res) => {
     if (req.user) {
-      db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").find({ id: Number(req.body.id) }).assign({deleted: true}).write();
+      db.get("members.members").find({ id: req.user.id }).get("messages.savedMessages").find({ id: Number(req.body.id) }).assign({ deleted: true }).write();
 
       res.sendStatus(200);
     } else {
@@ -218,43 +218,59 @@ module.exports = (app, db, bcrypt, passport) => {
   });
 
   app.post("/api/createAccount", (req, res) => {
-    let hash = bcrypt.hashSync(req.body.password, 10);
+    if (db.get("members.members").find({ name: req.body.username }).value()) {
+      res.json({ error: "That username has already been taken." });
+    } else if (/[^A-Za-z0-9]+/g.test(req.body.username)) {
+      res.json({ error: "A username can only contain letters and numbers." });
+    } else if (!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(req.body.email)) {
+      res.json({ error: "Make sure you entered a valid email address." });
+    } else if (/[^A-Za-z]+/g.test(req.body.firstName)) {
+      res.json({ error: "Make sure you entered a valid first name." });
+    } else if (/[^A-Za-z]+/g.test(req.body.lastName)) {
+      res.json({ error: "Make sure you entered a valid last name." });
+    } else if (req.body.password !== req.body.confirmPassword) {
+      res.json({ error: "Make sure your passwords match." });
+    } else {
 
-    db.get("members.members").push(
-      {
-        name: req.body.username,
-        email: req.body.email,
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        dateJoined: new Date(Date.now()).toLocaleDateString("en-US"),
-        password: hash,
-        messages: [],
-        notifications: { messages: [] },
-        isAdmin: false,
-        lastVisited: 0,
-        isOnline: false,
-        profile: {
-          picture: "/profile/default.jpg",
-          aboutMe: "",
-          realName: "",
-          location: "",
-        },
-        pending: db.get("config.requireApproval").value(),
-        id: db.get("members.members").size().value() + 1,
-        club: {
-          status: null,
-          name: null
+      let hash = bcrypt.hashSync(req.body.password, 10);
+
+      db.get("members.members").push(
+        {
+          name: req.body.username,
+          email: req.body.email,
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          dateJoined: Date.now(),
+          password: hash,
+          messages: [],
+          notifications: { messages: [] },
+          isAdmin: false,
+          lastVisited: 0,
+          isOnline: false,
+          deactivated: false,
+          profile: {
+            picture: "/profile/default.jpg",
+            aboutMe: "",
+            realName: "",
+            location: "",
+          },
+          pending: db.get("config.requireApproval").value(),
+          id: db.get("config.requireApproval").value() ? db.get("members.members").size().value() + 1 : null,
+          club: {
+            status: null,
+            name: null
+          }
         }
-      }
-    ).write();
+      ).write();
 
-    res.redirect("/login");
+      res.sendStatus(200);
+    }
   });
 
   app.post("/api/acceptMember", (req, res) => {
     if (req.user) {
       if (req.user.isAdmin) {
-        db.get("members.members").find({ name: req.body.name, id: Number(req.body.id) }).assign({ pending: false }).write();
+        db.get("members.members").find({ name: req.body.name }).assign({ pending: false, id: db.get("members.members").size().value() + 1 }).write();
         res.sendStatus(200);
       } else {
         res.sendStatus(401);
@@ -276,7 +292,7 @@ module.exports = (app, db, bcrypt, passport) => {
           })
         }
 
-        db.get("members.members").find({ id: Number(req.body.id) }).assign({ deactivated: true, club: { status: null, name: null } }).write();
+        db.get("members.members").find({ name: req.body.name }).assign({ deactivated: true, club: { status: null, name: null } }).write();
         res.sendStatus(200);
       } else {
         if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner") {
@@ -334,7 +350,14 @@ module.exports = (app, db, bcrypt, passport) => {
   app.post("/api/updateConfig", (req, res) => {
     if (req.user) {
       if (req.user.isAdmin) {
-        db.get("config").assign({ siteName: req.body.siteName, profilePicMaxSize: req.body.upload, requireApproval: (req.body.requireApproval ? true : false) }).write();
+        if (!req.body.chessClubs) {
+          if (db.get("config.chessClubs").value()) {
+            db.get("members.members").value().map(member => db.get("members.members").find({ id: member.id }).get("club").assign({ name: null, status: null }).write());
+            db.assign({ clubs: [] }).write();
+          }
+        }
+
+        db.get("config").assign({ siteName: req.body.siteName, profilePicMaxSize: req.body.upload, requireApproval: (req.body.requireApproval ? true : false), chessClubs: (req.body.chessClubs ? true : false) }).write();
         db.get("config").assign({ gameTimes: [] }).write();
 
         for (let i = 0; i < 3; i++) {
@@ -352,18 +375,25 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/createClub", (req, res) => {
     if (req.user) {
-      db.get("clubs").push({
-        name: req.body.name,
-        link: req.body.name.replace(/ /g, "-").replace(/'/g, "").replace(/"/g, "").toLowerCase(),
-        owner: req.user.id,
-        dateCreated: Date.now(),
-        text: "",
-        hits: 0,
-        members: []
-      }).write();
+      if (/[^A-Za-z\s0-9]+/g.test(req.body.name)) {
+        res.json({ error: "A club name can only contain letters and numbers." });
+      } else {
+        if (db.get("config.chessClubs").value()) {
+          db.get("clubs").push({
+            name: req.body.name,
+            owner: req.user.id,
+            dateCreated: Date.now(),
+            text: "",
+            hits: 0,
+            members: []
+          }).write();
 
-      db.get("members.members").find({ name: req.user.name }).get("club").assign({ status: "owner", name: req.body.name, link: req.body.name.replace(" ", "-").replace("'", "").replace('"', "").toLowerCase() }).write();
-      res.sendStatus(200);
+          db.get("members.members").find({ name: req.user.name }).get("club").assign({ status: "owner", name: req.body.name }).write();
+          res.sendStatus(200);
+        } else {
+          res.sendStatus(401);
+        }
+      }
     } else {
       res.sendStatus(401);
     }

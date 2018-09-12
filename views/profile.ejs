@@ -42,6 +42,9 @@
           <a class="nav-link" href="/games">Games</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link" href="/members">Members</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="/clubs">Chess Clubs</a>
         </li>
         <li class="nav-item">
@@ -71,11 +74,11 @@
         <% } %>
       </h2>
 
-      <p>Member since <%= profile.dateJoined %><br>
+      <p>Member since <%= new Date(profile.dateJoined).toLocaleDateString("en-US") %><br>
         <% if (profile.club.status == "owner") { %>
-          Club owner of <a href="/clubs/<%= profile.club.link %>"><%= profile.club.name %></a>
+          Club owner of <a href="/clubs/<%= profile.club.name %>"><%= profile.club.name %></a>
         <% } else if (profile.club.status == "member") { %>
-          Club member of <a href="/clubs/<%= profile.club.link %>"><%= profile.club.name %></a>
+          Club member of <a href="/clubs/<%= profile.club.name %>"><%= profile.club.name %></a>
         <% } %>
       </p>
     </div>
