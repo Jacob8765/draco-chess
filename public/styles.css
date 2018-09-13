@@ -79,4 +79,10 @@ body {
     max-width: 90%;
     min-width: 90%;
   }
+
+  #board, #chat {
+    max-width: 90%;
+    min-width: 90%;
+    margin: 10px;
+  }
 }

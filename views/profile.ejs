@@ -116,7 +116,7 @@
 
   var wins = games.filter(game => game.winner == profileName).length;
   var draws = games.filter(game => game.winner == "draw").length;
-  var losses = games.filter(game => game.winner !== profileName && game.isOver).length;
+  var losses = games.filter(game => game.winner !== profileName && game.isOver && game.winner !== "draw").length;
   var socket = io.connect(window.location.host);
 
   var ctxD = document.getElementById("doughnutChart").getContext('2d');

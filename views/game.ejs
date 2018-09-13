@@ -68,17 +68,6 @@
     </div>
   </nav>
 
-  <div class="text-center d-flex justify-content-around flex-wrap">
-    <div>
-      <a href="/profile/<%= white.name %>"><div class="profile-img white-profile m-auto" title="<%= white.name %>" style="background-image: url('<%= white.profile.picture %>')"></div></a>
-      <h6 id="wTime" class="<%= game[game.currentTurn] == white.name ? 'font-weight-bold' : '' %> mt-1"><%= game.wTime %></h6>
-    </div>
-    <div>
-      <a href="/profile/<%= black.name %>"><div class="profile-img black-profile m-auto" title="<%= black.name %>" style="background-image: url('<%= black.profile.picture %>')"></div></a>
-      <h6 id="bTime" class="<%= game[game.currentTurn] == black.name ? 'font-weight-bold' : '' %> mt-1"><%= game.bTime %></h6>
-    </div>
-  </div>
-
   <div id="board"></div>
 
   <div id="chat">
@@ -95,6 +84,17 @@
   </div>
 
   <hr>
+
+  <div class="text-center d-flex justify-content-around flex-wrap">
+    <div class="m-2">
+      <a href="/profile/<%= white.name %>"><div class="profile-img white-profile m-auto z-depth-1" title="<%= white.name %>" style="background-image: url('<%= white.profile.picture %>')"></div></a>
+      <h4><a href="/profile/<%= white.name %>"><%= white.name %></a></h4> <h5>Time remaining: <b id="wTime" class="<%= game[game.currentTurn] == white.name ? 'font-weight-bold' : '' %> mt-1"><%= game.wTime %></b></h5>
+    </div>
+    <div class="m-2">
+      <div class="profile-img black-profile m-auto z-depth-1" title="<%= black.name %>" style="background-image: url('<%= black.profile.picture %>')"></div>
+      <h4><a href="/profile/<%= black.name %>"><%= black.name %></a></h4> <h5>Time remaining: <b id="bTime" class="<%= game[game.currentTurn] == black.name ? 'font-weight-bold' : '' %> mt-1"><%= game.bTime %></b></h5>
+    </div>
+  </div>
 
   <p class="text-center m-2">Status: <span id="status"></span></p>
   <p class="text-center m-2">FEN: <span id="fen"></span></p>
