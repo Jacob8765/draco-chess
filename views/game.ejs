@@ -88,11 +88,11 @@
   <div class="text-center d-flex justify-content-around flex-wrap">
     <div class="m-2">
       <a href="/profile/<%= white.name %>"><div class="profile-img white-profile m-auto z-depth-1" title="<%= white.name %>" style="background-image: url('<%= white.profile.picture %>')"></div></a>
-      <h4><a href="/profile/<%= white.name %>"><%= white.name %></a></h4> <h5>Time remaining: <b id="wTime" class="<%= game[game.currentTurn] == white.name ? 'font-weight-bold' : '' %> mt-1"><%= game.wTime %></b></h5>
+      <h4><a href="/profile/<%= white.name %>"><%= white.name %></a></h4> <h5>Time remaining: <p id="wTime" class="<%= game[game.currentTurn] == white.name ? 'font-weight-bold' : '' %> mt-1"><%= game.wTime %></p></h5>
     </div>
     <div class="m-2">
       <div class="profile-img black-profile m-auto z-depth-1" title="<%= black.name %>" style="background-image: url('<%= black.profile.picture %>')"></div>
-      <h4><a href="/profile/<%= black.name %>"><%= black.name %></a></h4> <h5>Time remaining: <b id="bTime" class="<%= game[game.currentTurn] == black.name ? 'font-weight-bold' : '' %> mt-1"><%= game.bTime %></b></h5>
+      <h4><a href="/profile/<%= black.name %>"><%= black.name %></a></h4> <h5>Time remaining: <p id="bTime" class="<%= game[game.currentTurn] == black.name ? 'font-weight-bold' : '' %> mt-1"><%= game.bTime %></p></h5>
     </div>
   </div>
 
@@ -311,31 +311,31 @@
     let days = Math.floor(distance / (1000 * 60 * 60 * 24));
     let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    //let seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-    document.getElementById(turn + "Time").innerHTML = (days > 0 ? days + " Days " : "") + (hours > 0 ? hours + " Hours " : "") + (minutes > 0 ? minutes + " Minutes " : "");
+    document.getElementById(turn + "Time").innerHTML = (days > 0 ? days + " Days " : "") + (hours > 0 ? hours + " Hours " : "") + minutes + " Minutes ";
   }
 
   formatTime("w", wTime);
   formatTime("b", bTime);
 
   gameEvent = (event) => {
-    console.log("Event: " + event);
-
-    if (event == "resign") {
+    if (event == "resign" || event == "draw") {
       swal({
         title: "Are you sure?",
-        text: "Are you sure you want to resign from the game?",
+        text: "Are you sure you want to " + event == "resign" ? "resign from the game?" : "Accept the draw?",
         icon: "warning",
         buttons: true,
         dangerMode: true,
       })
-      .then((willResign) => {
-        if (willResign) {
-          submitGameEvent("resign")
+      .then((isTrue) => {
+        if (isTrue) {
+          submitGameEvent(event)
         }
       });
-    } else if (event == "acceptDraw") {
+    } else {
+      submitGameEvent(event);
+    }
+    /*else if (event == "acceptDraw") {
       swal({
         title: "Are you sure?",
         text: "Are you sure you want to accept the draw?",
@@ -350,7 +350,7 @@
       });
     } else {
       submitGameEvent(event);
-    }
+    }*/
   }
 
   submitGameEvent = (event) => {
@@ -359,8 +359,6 @@
       id: gameObj.gameId
     })
     .then(function (response) {
-      console.log(response);
-
       if (event == "resign" || event == "checkmate" || event == "acceptDraw" ) {
         window.location = window.location;
       } else if (event == "requestDraw") {
