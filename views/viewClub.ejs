@@ -16,7 +16,6 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.9/js/mdb.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="/scripts.js"></script>
 </head>
 
@@ -71,8 +70,9 @@
 <script>
   var socket = io.connect(window.location.host);
   const user = <%- JSON.stringify(user.name) %>;
+  const text = <%- JSON.stringify(club.text) %>;
 
-  document.getElementById("clubText").innerHTML = marked(<%- JSON.stringify(club.text) %>.replace(/\n/gi, "<br>"));
+  document.getElementById("clubText").innerHTML = text;
 
   socket.on("message", (data) => {
     handleMessage(data, user);

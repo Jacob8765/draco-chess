@@ -232,7 +232,7 @@
   });
 
   if (document.getElementById("serverMessageText")) {
-    document.getElementById("serverMessageText").innerHTML = <%- JSON.stringify(serverMessages.message) %>.replace(/\n/gi, "<br>");
+    document.getElementById("serverMessageText").innerHTML = <%- JSON.stringify(serverMessages.message) %>;
   }
 </script>
 

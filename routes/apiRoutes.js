@@ -377,6 +377,8 @@ module.exports = (app, db, bcrypt, passport) => {
     if (req.user) {
       if (/[^A-Za-z\s0-9]+/g.test(req.body.name)) {
         res.json({ error: "A club name can only contain letters and numbers." });
+      } else if (req.body.name.length <= 0) {
+        res.json({ error: "A club name can not be left blank." });
       } else {
         if (db.get("config.chessClubs").value()) {
           db.get("clubs").push({
