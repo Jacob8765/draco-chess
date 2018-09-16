@@ -114,8 +114,8 @@
       <p class="p-2 m-0 text-left container-text">USERS ONLINE: <b><%= onlineUsers.length %></b></p>
       <div class="d-flex justify-content-center flex-wrap p-4" id="onlineUsers">
         <% if (onlineUsers.length > 0) { %>
-          <% onlineUsers.map((user) => { %>
-            <p class="<%= onlineUsers.length > 1 ? 'mr-2' : ''%>"><a href="/profile/<%= user %>"><%= user %></a><%= onlineUsers.length > 1 ? "," : ""%></p>
+          <% onlineUsers.map((user, index) => { %>
+            <p class="<%= index !== onlineUsers.length - 1 ? 'mr-2' : ''%>"><a href="/profile/<%= user %>"><%= user %></a><%= index !== onlineUsers.length - 1 ? "," : ""%></p>
           <% }); %>
         <% } else { %>
           <h5>No users currently online</h5>
