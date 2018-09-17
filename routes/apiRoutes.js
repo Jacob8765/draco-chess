@@ -432,7 +432,7 @@ module.exports = (app, db, bcrypt, passport) => {
 
   app.post("/api/acceptClubMember", (req, res) => {
     if (req.user) {
-      if (req.user.club.status == "owner") {
+      if (db.get("members.members").find({ id: req.user.id }).get("club.status").value() == "owner") {
         db.get("clubs").find({ owner: req.user.id }).get("members").find({ name: req.body.name }).assign({ pending: false }).write();
         db.get("members.members").find({ name: req.body.name }).get("club").assign({ status: "member" }).write();
         res.sendStatus(200);
